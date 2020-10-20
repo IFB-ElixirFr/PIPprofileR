@@ -3,7 +3,7 @@ graphic <- fluidPage(
   uiOutput("plotArea"), 
   
   div(id = "geneExplore", style="display : none;", 
-      h2(tagList(shiny::icon("search"), "Gene explotation")), 
+      h2(tagList(shiny::icon("search"), "Gene exploration")), 
       fluidRow(
         column(4, 
                selectizeInput("geneExplore_selector", "Select gene", 

@@ -61,4 +61,24 @@ RUN Rscript -e "install.packages('shinycustomloader', repos='https://cran.rstudi
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
     
 
-COPY shiny-server.conf /etc/shiny-server/
+RUN mkdir -p /srv/shiny-server/log
+RUN chmod -R 777 /srv/shiny-server/log
+RUN mkdir -p /srv/shiny-server/tmp
+RUN chmod -R 777 /srv/shiny-server/tmp
+RUN mkdir -p /srv/shiny-server/panels/ui
+RUN mkdir -p /srv/shiny-server/panels/server
+RUN mkdir -p /srv/shiny-server/www/css
+RUN mkdir -p /srv/shiny-server/www/img
+RUN mkdir -p /srv/shiny-server/R_scripts
+
+COPY shiny-server.conf /srv/shiny-server
+COPY panels/*.R /srv/shiny-server/panels
+COPY panels/ui/*.R /srv/shiny-server/panels/ui
+COPY panels/server/*.R /srv/shiny-server/panels/server
+COPY www/css /srv/shiny-server/www/css
+COPY www/img /srv/shiny-server/www/img
+COPY R_scripts/*.R /srv/shiny-server/R_scripts
+COPY ui.R /srv/shiny-server
+COPY server.R /srv/shiny-server
+
+
