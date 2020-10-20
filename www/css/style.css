@@ -1,0 +1,7 @@
+.content-wrapper {
+    background-color: white;
+}
+
+#downloadData:hover {
+  background-color: #ddd;
+}
