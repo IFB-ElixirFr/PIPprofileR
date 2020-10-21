@@ -118,7 +118,7 @@ output$plotPLOTLY <- renderPlotly({
 output$plotGGPLOT <- renderPlot({
   if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot) {
     if(!is.null(rvAnnotation$annotation )){
-      NULL
+      plotlyRV$plotGG
     } else {
       plotlyRV$plotGG
     }

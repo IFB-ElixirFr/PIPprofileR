@@ -88,13 +88,14 @@ graphic <- fluidPage(
   ), 
   
   h2(tagList(shiny::icon("save"), "Save plot")), 
-  fluidRow(column(3,numericInput("ggsave_width", label = "Width", min = 1, value = 29 )),
-           column(3,numericInput("ggsave_height", label = "Height", min = 1, value = 21 )),
-           column(3,selectInput("ggsave_unit", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm")), 
-           column(3,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300 )), 
-           selectInput("ggsave_format", label = "Format", 
-                       choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
-                       selected = "png")),
+  fluidRow(column(4,numericInput("ggsave_width", label = "Width", min = 1, value = 29 )),
+           column(4,numericInput("ggsave_height", label = "Height", min = 1, value = 21 )),
+           column(4,selectInput("ggsave_unit", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm"))),
+  
+  fluidRow(column(4,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300 )),
+           column(4, selectInput("ggsave_format", label = "Format", 
+                                 choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
+                                 selected = "png"))), 
   downloadButton('downloadPlot','Download Plot')
   
   
