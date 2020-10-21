@@ -111,7 +111,7 @@ IFB-ElixirFr , **PIPprofileR**, (2020), GitHub repository, https://github.com/IF
 
 ## Contributors
 
-- Thomas Denecker ([ORCID](https://orcid.org/0000-0003-1421-7641))
+- Thomas Denecker (ORCID [0000-0003-1421-7641](https://orcid.org/0000-0003-1421-7641))
 - Hélène Chiapello 
 - Jacques van Helden (ORCID [0000-0002-8799-8584](https://orcid.org/0000-0002-8799-8584))
 
