@@ -1,7 +1,7 @@
 graphic <- fluidPage(
   uiOutput("plotArea_title"),
   uiOutput("plotArea"), 
-  
+
   div(id = "geneExplore", style="display : none;", 
       h2(tagList(shiny::icon("search"), "Gene exploration")), 
       fluidRow(
@@ -17,7 +17,6 @@ graphic <- fluidPage(
                uiOutput("resumeGene_attributes")
         )
       ), 
-      
       actionButton("updateGenes", label = "Search", icon = icon("search"))
   ), 
   
@@ -30,8 +29,11 @@ graphic <- fluidPage(
          tabPanel("General",
                   h4("Reverse plot : "),
                   switchInput(inputId = "reversePlot",NULL,  value = TRUE), 
+                  h4("Plot dynamic: "),
+                  switchInput(inputId = "dynamicPlot",NULL,  value = FALSE),
                   h4("Window size:"),
-                  numericInput("windowSize", label = NULL, value = 500)
+                  numericInput("windowSize", label = NULL, value = 500, step = 50), 
+                  actionButton("updateGeneral", label = "Update", icon = icon("sync-alt"))
          ),
          tabPanel("Limits",
                   sliderInput("ylimRange", "Y limits",
@@ -53,13 +55,14 @@ graphic <- fluidPage(
                            textInput("titleInput_y", "Y title"))
                   ), 
                   actionButton("updateTitle", label = "Update", icon = icon("sync-alt"))
-                  
          ),
          tabPanel("Colors", 
                   selectizeInput("speciesColor_name", "Select species", 
                                  width = "100%", choices = NULL, 
                                  selected = NULL, multiple = FALSE), 
-                  colourInput("speciesColor_picker", "Select color") ),
+                  colourInput("speciesColor_picker", "Select color"), 
+                  actionButton("updateColor", label = "Update", icon = icon("sync-alt")) 
+         ),
          tabPanel("Grid",
                   fluidRow(
                     column(4, h4("Grid color"),
@@ -79,7 +82,8 @@ graphic <- fluidPage(
                            numericInput("spaceMinorV", "Vertical minor", value = 10, min = 0, max = 100, step = 10),
                            numericInput("spaceMajorV", "Vertical major", value = 5, min = 0, max = 100, step = 5) 
                     )
-                  ),
+                  ), 
+                  actionButton("updateGrid", label = "Update", icon = icon("sync-alt")) 
          )
   ), 
   
@@ -87,7 +91,10 @@ graphic <- fluidPage(
   fluidRow(column(3,numericInput("ggsave_width", label = "Width", min = 1, value = 29 )),
            column(3,numericInput("ggsave_height", label = "Height", min = 1, value = 21 )),
            column(3,selectInput("ggsave_unit", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm")), 
-           column(3,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300 ))),
+           column(3,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300 )), 
+           selectInput("ggsave_format", label = "Format", 
+                       choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
+                       selected = "png")),
   downloadButton('downloadPlot','Download Plot')
   
   

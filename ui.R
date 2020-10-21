@@ -55,6 +55,7 @@ suppressMessages(suppressWarnings(library(knitr)))
 #===============================================================================
 suppressMessages(suppressWarnings(library(xlsx)))
 suppressMessages(suppressWarnings(library(rlist)))
+suppressMessages(suppressWarnings(library(svglite)))
 
 ################################################################################
 ###                           FUNCTIONS                                      ###

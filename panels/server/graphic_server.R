@@ -12,7 +12,12 @@ firstup <- function(x) {
 ################################################################################
 
 output$plotArea <- renderUI(
-  withLoader(plotlyOutput("plot", height = "500px"))
+  if(input$dynamicPlot){
+    withLoader(plotlyOutput("plotPLOTLY", height = "500px"))
+  } else {
+    withLoader(plotOutput("plotGGPLOT", height = "500px"))
+  }
+  
 )
 
 output$plotArea_title <- renderUI(
@@ -31,14 +36,14 @@ output$resumeGene_general <- renderUI({
   div(
     h4("General information"), 
     p(tags$b("Sequence ID: "), rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(seqid),tags$br(),
-    tags$b("Source: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(source),tags$br(),
-    tags$b("Start: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(start),tags$br(),
-    tags$b("End: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(end),tags$br(),
-    tags$b("Score: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(end),tags$br(),
-    tags$b("Strand: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(strand),tags$br(),
-    tags$b("phase: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(phase)),tags$br()
+      tags$b("Source: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(source),tags$br(),
+      tags$b("Start: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(start),tags$br(),
+      tags$b("End: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(end),tags$br(),
+      tags$b("Score: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(end),tags$br(),
+      tags$b("Strand: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(strand),tags$br(),
+      tags$b("phase: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(phase)),tags$br()
   )
-
+  
 })
 
 output$resumeGene_attributes <- renderUI({
@@ -52,31 +57,31 @@ output$resumeGene_attributes <- renderUI({
 # Generate plotly
 ################################################################################
 
-output$plot <- renderPlotly({
-  
-  #===========================================================================
-  # plot
-  #===========================================================================
-  
-  if(!is.null(genomes$genomesNto1$alignments)) {
-    
+observe({
+  if(!is.null(plotlyRV$p)){
     plotlyRV$plotGG <- ggplot(plotlyRV$p, aes(x = x, y = y, colour = name)) + 
       geom_line() + 
       ggtitle(plotlyRV$title_main) + 
       scale_color_manual(values= plotlyRV$colors) + 
       theme(panel.background = element_rect(fill = "white", colour = "white"),
-            panel.grid.minor.y = element_line(colour=input$colMinorH, size=input$sizeMinorH) , 
-            panel.grid.major.y = element_line(colour=input$colMajorH, size=input$sizeMajorH), 
-            panel.grid.minor.x = element_line(colour=input$colMinorV, size=input$sizeMinorV) , 
-            panel.grid.major.x = element_line(colour=input$colMajorV, size=input$sizeMajorV)) +
+            panel.grid.minor.y = element_line(colour=plotlyRV$colMinorH, size=plotlyRV$sizeMinorH) , 
+            panel.grid.major.y = element_line(colour=plotlyRV$colMajorH, size=plotlyRV$sizeMajorH), 
+            panel.grid.minor.x = element_line(colour=plotlyRV$colMinorV, size=plotlyRV$sizeMinorV) , 
+            panel.grid.major.x = element_line(colour=plotlyRV$colMajorV, size=plotlyRV$sizeMajorV)) +
       scale_x_continuous( name= plotlyRV$title_x , limits=plotlyRV$xlim ,
-                          breaks = seq(0, length(plotlyRV$refPositions), input$spaceMajorH),
-                          minor_breaks = seq(0, length(plotlyRV$refPositions), input$spaceMinorH))  +
+                          breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMajorH), 
+                          minor_breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMinorH))  +
       scale_y_continuous( name=plotlyRV$title_y, 
                           limits=plotlyRV$ylim , 
-                          breaks = seq(0, 100, input$spaceMajorV),
-                          minor_breaks = seq(0, 100, input$spaceMinorV)) + 
+                          breaks = seq(0, 100, plotlyRV$spaceMajorV),
+                          minor_breaks = seq(0, 100, plotlyRV$spaceMinorV)) + 
       labs(color=plotlyRV$title_legende) 
+  }
+})
+
+output$plotPLOTLY <- renderPlotly({
+  
+  if(!is.null(genomes$genomesNto1$alignments) & input$dynamicPlot) {
     
     if(!is.null(rvAnnotation$annotation )){
       
@@ -110,6 +115,18 @@ output$plot <- renderPlotly({
   
 })
 
+output$plotGGPLOT <- renderPlot({
+  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot) {
+    if(!is.null(rvAnnotation$annotation )){
+      NULL
+    } else {
+      plotlyRV$plotGG
+    }
+  } else {
+    NULL
+  }
+})
+
 ################################################################################
 # Update 
 ################################################################################
@@ -126,21 +143,14 @@ observeEvent(input$speciesColor_name, {
                     value = as.character(plotlyRV$colors[input$speciesColor_name]))
 })
 
-observeEvent(input$speciesColor_picker, {
-  plotlyRV$colors[input$speciesColor_name] = input$speciesColor_picker
-})
-
-
-
-
 observeEvent(rvAnnotation$annotation, {
   if(!is.null(rvAnnotation$annotation)){
-
+    
     updateSelectInput(session, "geneExplore_selector", 
                       choices = c(All = "All", setNames(rvAnnotation$Gene$geneName, 
-                                         rvAnnotation$Gene$geneName)),
+                                                        rvAnnotation$Gene$geneName)),
                       selected = "All"
-                      )
+    )
   }
   rm(inter)
 })
@@ -152,7 +162,6 @@ observeEvent(rvAnnotation$annotation, {
 
 
 observeEvent(input$updateTitle, {
-  
   plotlyRV$title_main = input$titleInput_main
   plotlyRV$title_x = input$titleInput_x
   plotlyRV$title_y = input$titleInput_y
@@ -175,10 +184,31 @@ observeEvent(input$updateGenes, {
                       length(plotlyRV$refPositions))
   } else {
     plotlyRV$xlim = sort(c(as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(start)),
-                      as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(end))))
+                           as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(end))))
     message(paste0(plotlyRV$xlim, collapse = ""))
   }
 })
+
+observeEvent(input$updateColor, {
+  plotlyRV$colors[input$speciesColor_name] = input$speciesColor_picker
+})
+
+observeEvent(input$updateGrid, {
+  plotlyRV$colMinorH = input$colMinorH 
+  plotlyRV$sizeMinorH = input$sizeMinorH 
+  plotlyRV$colMajorH = input$colMajorH 
+  plotlyRV$sizeMajorH = input$sizeMajorH 
+  plotlyRV$colMinorV = input$colMinorV 
+  plotlyRV$sizeMinorV = input$sizeMinorV 
+  plotlyRV$colMajorV = input$colMajorV 
+  plotlyRV$sizeMajorV = input$sizeMajorV
+  
+  plotlyRV$spaceMajorH = input$spaceMajorH 
+  plotlyRV$spaceMinorH = input$spaceMinorH 
+  plotlyRV$spaceMajorV = input$spaceMajorV 
+  plotlyRV$spaceMinorV = input$spaceMinorV
+})
+
 
 
 ################################################################################
@@ -188,9 +218,9 @@ observeEvent(input$updateGenes, {
 observeEvent({ 
   genomes$genomesNto1$alignments
   rvAnnotation$annotation
+  input$updateGeneral
   input$reversePlot
-  input$windowSize
-}, {
+} , {
   if(!is.null(genomes$genomesNto1$alignments)) {
     
     #===========================================================================
@@ -300,7 +330,7 @@ observeEvent({
     plotlyRV$colors <- setNames(interNames$color, 
                                 interNames$name)
     rm(ggplotTable)
-  
+    
     plotlyRV$title_main = "Full PIP profile"
     plotlyRV$title_x = "Position"
     plotlyRV$title_y = paste0("PIP (", plotlyRV$windowSize," bp-averaged)")
@@ -308,6 +338,20 @@ observeEvent({
     
     plotlyRV$xlim = c(0,length(plotlyRV$refPositions))
     plotlyRV$ylim = c(0,100)
+    
+    plotlyRV$colMinorH = input$colMinorH 
+    plotlyRV$sizeMinorH = input$sizeMinorH 
+    plotlyRV$colMajorH = input$colMajorH 
+    plotlyRV$sizeMajorH = input$sizeMajorH 
+    plotlyRV$colMinorV = input$colMinorV 
+    plotlyRV$sizeMinorV = input$sizeMinorV 
+    plotlyRV$colMajorV = input$colMajorV 
+    plotlyRV$sizeMajorV = input$sizeMajorV
+    
+    plotlyRV$spaceMajorH = input$spaceMajorH 
+    plotlyRV$spaceMinorH = input$spaceMinorH 
+    plotlyRV$spaceMajorV = input$spaceMajorV 
+    plotlyRV$spaceMinorV = input$spaceMinorV
     
     #===========================================================================
     # Update
@@ -395,7 +439,7 @@ observeEvent(rvAnnotation$annotation, {
 ################################################################################
 
 output$downloadPlot <- downloadHandler(
-  filename = function(){paste("FullPIP",'.png',sep='')},
+  filename = function(){paste0("FullPIP",'.', input$ggsave_format)},
   content = function(file){
     ggsave(file, plot=plotlyRV$plotGG, 
            width = input$ggsave_width,
