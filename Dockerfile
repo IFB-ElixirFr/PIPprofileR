@@ -60,6 +60,8 @@ RUN Rscript -e "install.packages('ape', repos='https://cran.rstudio.com/', depen
 RUN Rscript -e "install.packages('shinycustomloader', repos='https://cran.rstudio.com/', dependencies = TRUE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
     
+RUN Rscript -e "install.packages('svglite', repos='https://cran.rstudio.com/', dependencies = TRUE)" \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
 RUN mkdir -p /srv/shiny-server/log
 RUN chmod -R 777 /srv/shiny-server/log
