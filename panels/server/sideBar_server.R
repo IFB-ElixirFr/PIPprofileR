@@ -10,7 +10,7 @@ observeEvent(rvEnvent$load, {
                    },
                    menuItem("Summary", tabName = "resume", icon = icon("file")),
                    menuItem("Graphic", tabName = "graphic", icon = icon("chart-area")),
-                   menuItem("Table", tabName = "tableResults", icon = icon("table")),
+                   menuItem("Score", tabName = "tableResults", icon = icon("table")),
                    menuItem("Tree", tabName = "tree", icon = icon("tree")),
                    menuItem("Heatmap", tabName = "heatmap", icon = icon("chess-board")),
                    if( !is.null(rvAnnotation$annotation)){

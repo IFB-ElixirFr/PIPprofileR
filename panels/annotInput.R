@@ -32,8 +32,8 @@ annotInput <- function(){
       inline = TRUE,
       choices = list(
         "GFF3" = "gff3",
-        "GFF2 / GTF" = "gtf",
-        "bed" = "bed"
+        "GFF2 / GTF" = "gtf"
+        ,"bed" = "bed"
       ),
       selected = "gff3"
     ),

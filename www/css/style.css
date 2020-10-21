@@ -5,3 +5,9 @@
 #downloadData:hover {
   background-color: #ddd;
 }
+
+.btn-myClass {
+    background-color: #f4f4f4 !important;
+    color: #444 !important;
+    border-color: #ddd !important;
+}
