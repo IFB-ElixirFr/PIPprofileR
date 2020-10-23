@@ -14,8 +14,10 @@ firstup <- function(x) {
 output$plotArea <- renderUI(
   if(input$dynamicPlot){
     withLoader(plotlyOutput("plotPLOTLY", height = "500px"))
-  } else {
+  } else if( is.null(rvAnnotation$annotation )) {
     withLoader(plotOutput("plotGGPLOT", height = "500px"))
+  } else {
+    withLoader(girafeOutput("plotGGPLOT_ggiraph",  height = "100%"))
   }
   
 )
@@ -116,12 +118,27 @@ output$plotPLOTLY <- renderPlotly({
 })
 
 output$plotGGPLOT <- renderPlot({
-  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot) {
-    if(!is.null(rvAnnotation$annotation )){
+  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & is.null(rvAnnotation$annotation)) {
       plotlyRV$plotGG
-    } else {
-      plotlyRV$plotGG
-    }
+  } else {
+    NULL
+  }
+})
+
+
+output$plotGGPLOT_ggiraph <- renderGirafe({
+  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & !is.null(rvAnnotation$annotation )) {
+
+      annotationTable <- subset(rvAnnotation$annotation, type == "gene")
+      
+      p <- plotlyRV$plotGG +
+        geom_segment_interactive(data=annotationTable, mapping=aes(x=start, y=1,
+                                                                   xend=end, 
+                                                                   yend=1, 
+                                                                   tooltip = attributes),
+                                 arrow=grid::arrow(length = grid::unit(0.03, "npc")),
+                                 size=2, color="blue")
+      girafe(ggobj = p, width_svg = 12)
   } else {
     NULL
   }
@@ -185,7 +202,6 @@ observeEvent(input$updateGenes, {
   } else {
     plotlyRV$xlim = sort(c(as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(start)),
                            as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(end))))
-    message(paste0(plotlyRV$xlim, collapse = ""))
   }
 })
 

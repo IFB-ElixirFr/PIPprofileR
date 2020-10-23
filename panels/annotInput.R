@@ -33,7 +33,7 @@ annotInput <- function(){
       choices = list(
         "GFF3" = "gff3",
         "GFF2 / GTF" = "gtf"
-        ,"bed" = "bed"
+        ,"Demo" = "Demo"
       ),
       selected = "gff3"
     ),
@@ -55,7 +55,6 @@ output$errorArea <- renderUI({
     NULL
   }
 })
-
 
 output$annotUI <- renderUI({
   disable("okAnnot")

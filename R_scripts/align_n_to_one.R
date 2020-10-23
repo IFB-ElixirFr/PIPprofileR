@@ -35,7 +35,7 @@ alignNtoOne <- function(refSequence,
                  
                  i <- 1
                  for (i in 1:seqNb) {
-                  # incProgress(1/seqNb)
+                  incProgress(1/seqNb)
                    
                    subjectName <- seqNames[i]
                    message("\t\tAligning sequence ", i, "/", seqNb,  "\t", subjectName)
@@ -75,9 +75,6 @@ alignNtoOne <- function(refSequence,
             "\tExporting multiple alignments to file\n\t\t", outfile)
   }
   
-  ## Write the reference sequence in the output fle
-  # writeXStringSet(refsequence, filepath = outfile, format = "fasta")
-  
   ## Extract the matching sequences
   i <- 1
   nbAlignments <- length(alignments)
@@ -103,12 +100,6 @@ alignNtoOne <- function(refSequence,
     
     result$sequences <- append(result$sequences, seqStringSet)
     
-    ## Write pairwise alignment (temporarily disaactivated)
-    # alignmentFile <- paste0("pairwise-alignment_", 
-    #                         # gsub(pattern = "/", replacement = "-", x = sequenceName), 
-    #                         ".txt")
-    # writePairwiseAlignments(x = alignment, file = outfile)
-    
     ## Append the sequence to the file
     if (!is.null(outfile)) {
       message("\tAppending sequence ", i, "/", nbAlignments, "\t", sequenceID)
@@ -120,4 +111,4 @@ alignNtoOne <- function(refSequence,
   
   return(result)
 }
-# View(alignmentStats)
+

@@ -48,7 +48,8 @@ output$dataUI <- renderUI({
       h4("Select file"),
       fileInput("file",label = NULL,
                 buttonLabel = "Browse...",
-                placeholder = "No file selected"),
+                placeholder = "No file selected",
+                accept = c(".fasta", ".fa")),
       
       h4("Summary"),
       DTOutput('previewFasta')
@@ -104,6 +105,7 @@ observeEvent(input$okData, {
         if (!is.null(input$fileRData)){
           load(input$fileRData$datapath)
           genomes$genomesNto1 <- Nto1_list
+          plotlyRV = Nto1_list$plot
           rm(Nto1_list)
           updateTabItems(session, "tabs", selected = "resume")
         }
@@ -114,13 +116,4 @@ observeEvent(input$okData, {
   rvEnvent$load <- T
   message(paste("[PIPprofileR] Correct upload with", input$dataset, "mode :", message))
   
-  # if (T) {
-  #   
-  #   
-  #   
-  # } else {
-  #   rvEnvent$load <- F
-  #   showModal(dataInput(failed = TRUE))
-  #   updateTabItems(session, "tabs", selected = "home")
-  # }
 })

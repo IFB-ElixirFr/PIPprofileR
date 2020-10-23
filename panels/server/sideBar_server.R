@@ -11,8 +11,7 @@ observeEvent(rvEnvent$load, {
                    menuItem("Summary", tabName = "resume", icon = icon("file")),
                    menuItem("Graphic", tabName = "graphic", icon = icon("chart-area")),
                    menuItem("Score", tabName = "tableResults", icon = icon("table")),
-                   menuItem("Tree", tabName = "tree", icon = icon("tree")),
-                   menuItem("Heatmap", tabName = "heatmap", icon = icon("chess-board")),
+                   menuItem("Alignment", tabName = "alignmentTabItem", icon = icon("equals")),
                    if( !is.null(rvAnnotation$annotation)){
                      menuItem("Annotations", tabName ="annotationTabItem", icon = icon("pen"))
                    },

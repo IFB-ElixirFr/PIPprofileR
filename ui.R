@@ -26,6 +26,9 @@ suppressMessages(suppressWarnings(library(shinycssloaders)))
 suppressMessages(suppressWarnings(library(shinyhelper)))
 suppressMessages(suppressWarnings(library(colourpicker)))
 suppressMessages(suppressWarnings(library(shinycustomloader)))
+suppressMessages(suppressWarnings(library(DECIPHER)))
+suppressMessages(suppressWarnings(library(ggiraph)))
+suppressMessages(suppressWarnings(library(tibble)))
 
 #===============================================================================
 # Read FASTA files 
@@ -74,6 +77,7 @@ source("panels/ui/about_ui.R", local = TRUE)
 source("panels/ui/tableResults_ui.R", local = TRUE)
 source("panels/ui/resume_ui.R", local = TRUE)
 source("panels/ui/annotationTabItem_ui.R", local = TRUE)
+source("panels/ui/alignmentTabItem_ui.R", local = TRUE)
 
 ################################################################################
 ###                              MAIN                                        ###
@@ -135,8 +139,7 @@ shinyUI(
                 tabItem("resume",resume), 
                 tabItem("tableResults",tableResults),
                 tabItem("graphic",graphic), 
-                # tabItem("tree",treeTabItem), 
-                # tabItem("heatmap",heatmapTabItem), 
+                tabItem("alignmentTabItem",alignmentTabItem), 
                 tabItem("annotationTabItem", annotationTabItem), 
                 tabItem("about", about)
             )

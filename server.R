@@ -36,6 +36,7 @@ shinyServer(function(input, output, session) {
     source("panels/server/resume_server.R", local = TRUE)
     source("panels/server/header_server.R", local = TRUE)
     source("panels/server/annotationTabItem_server.R", local = TRUE)
+    source("panels/server/alignmentTabItem_server.R", local = TRUE)
     
     #===========================================================================
     # Session
@@ -60,15 +61,20 @@ shinyServer(function(input, output, session) {
     tmpFolderRV <- reactiveValues()
     
     #===========================================================================
-    # Reactive Values
+    # Dir creation
     #===========================================================================
     
-    if(! dir.exists("tmp")){
-        dir.create("tmp")
+    if(! dir.exists("www/tmp")){
+        dir.create("www/tmp")
     }
     
-    dir.create(paste0("tmp/", format(Sys.time(), "%Y%m%d_%H%M%S")))
-    tmpFolder = paste0("tmp/", format(Sys.time(), "%Y%m%d_%H%M%S"))
+    nameTmpFolder = format(Sys.time(), "%Y%m%d_%H%M%S")
+    
+    tmpFolder = paste0("www/tmp/",nameTmpFolder)
+    tmpFolderWithoutWWW = paste0("tmp/",nameTmpFolder)
+    
+    dir.create(paste0("www/tmp/", nameTmpFolder))
+    dir.create(paste0("www/tmp/", nameTmpFolder, "/BrowseSeqs"))
     
     #===========================================================================
     # Modal part - Import data & annotation
@@ -166,10 +172,6 @@ shinyServer(function(input, output, session) {
                         refSequence = refGenome, 
                         querySequences = queryGenomes,
                         outfile = OF)
-                    
-                    Nto1_list <- genomes$genomesNto1
-                    save(Nto1_list, file = file.path(tmpFolder,'Nto1_alignments/genomesNto1.Rdata'))
-                    rm(Nto1_list)
                 },
             "rdata" =
                 {
@@ -191,9 +193,17 @@ shinyServer(function(input, output, session) {
     
     output$downloadData <- downloadHandler(
         filename = function() {
-            paste("output", "zip", sep=".")
+            paste0(nameTmpFolder, ".zip")
         },
         content = function(fname) {
+            
+            #===================================================================
+            # Data preparation 
+            #===================================================================
+            Nto1_list <- genomes$genomesNto1
+            save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
+            rm(Nto1_list)
+            
             tmpdir <- tmpFolder
             oldDir <- getwd()
             setwd(tmpFolder)
