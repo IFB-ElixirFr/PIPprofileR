@@ -63,6 +63,12 @@ RUN Rscript -e "install.packages('shinycustomloader', repos='https://cran.rstudi
 RUN Rscript -e "install.packages('svglite', repos='https://cran.rstudio.com/', dependencies = TRUE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
+RUN R -e "if (!requireNamespace('BiocManager', quietly = TRUE)) {install.packages('BiocManager')} ; BiocManager::install('DECIPHER', ask=F)" \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
+
+RUN Rscript -e "install.packages('ggiraph', repos='https://cran.rstudio.com/', dependencies = TRUE)" \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
+
 RUN mkdir -p /srv/shiny-server/log
 RUN chmod -R 777 /srv/shiny-server/log
 RUN mkdir -p /srv/shiny-server/tmp
