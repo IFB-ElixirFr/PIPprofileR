@@ -11,3 +11,11 @@
     color: #444 !important;
     border-color: #ddd !important;
 }
+
+h2 {
+  font-size: 25px;
+  background-color: #3c8dbc;
+  padding: 5px 10px;
+  color: white;
+  font-weight: bold;
+}

@@ -71,7 +71,7 @@ source("./R_scripts/align_n_to_one.R")
 ################################################################################
 
 source("panels/ui/home_ui.R", local = TRUE)
-source("panels/ui/genomeFilters_ui.R", local = TRUE)
+source("panels/ui/sequenceFilters_ui.R", local = TRUE)
 source("panels/ui/graphic_ui.R", local = TRUE)
 source("panels/ui/about_ui.R", local = TRUE)
 source("panels/ui/tableResults_ui.R", local = TRUE)
@@ -99,9 +99,7 @@ shinyUI(
                                                       icon = icon("upload"),
                                                       width = 200
                                          ),
-                                         
-                                         uiOutput('RunButton'), 
-
+                                        
                                          downloadButton("downloadData", label = "Download", style = "width:200px;margin: 0px; padding : 6px 12px !important; display: block; color: #444 !important;")
                                      ),
                                      dropdownMenu(icon = icon("question-circle"),badgeStatus =NULL,headerText = "Global information",
@@ -135,7 +133,7 @@ shinyUI(
             useShinyalert(),
             tabItems(
                 tabItem("home", home),
-                tabItem("genomeFilters", genomeFilters),
+                tabItem("sequenceFilters", sequenceFilters),
                 tabItem("resume",resume), 
                 tabItem("tableResults",tableResults),
                 tabItem("graphic",graphic), 

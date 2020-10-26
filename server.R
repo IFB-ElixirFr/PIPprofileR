@@ -21,6 +21,8 @@ library(shiny)
 
 shinyServer(function(input, output, session) {
     
+    options(shiny.maxRequestSize=100*1024^2)
+    
     #===========================================================================
     # PANELS & FUNCTIONS                                 
     #===========================================================================
@@ -28,13 +30,12 @@ shinyServer(function(input, output, session) {
     source("panels/dataInput.R", local = TRUE)
     source("panels/annotInput.R", local = TRUE)
     source("panels/server/sideBar_server.R", local = TRUE)
-    source("panels/server/genomeFilters.R", local = TRUE)
+    source("panels/server/sequenceFilters_server.R", local = TRUE)
     source("panels/server/graphic_server.R", local = TRUE)
     source("panels/server/tableResults_server.R", local = TRUE)
     source("panels/server/about_server.R", local = TRUE)
     source("panels/server/home_server.R", local = TRUE)
     source("panels/server/resume_server.R", local = TRUE)
-    source("panels/server/header_server.R", local = TRUE)
     source("panels/server/annotationTabItem_server.R", local = TRUE)
     source("panels/server/alignmentTabItem_server.R", local = TRUE)
     
@@ -55,8 +56,9 @@ shinyServer(function(input, output, session) {
     rvEnvent <- reactiveValues()
     features <- reactiveValues()
     species <- reactiveValues()
-    rvEnvent$load = F
     plotlyRV <- reactiveValues()
+    
+    rvEnvent$load = F
     
     tmpFolderRV <- reactiveValues()
     
@@ -172,6 +174,7 @@ shinyServer(function(input, output, session) {
                         refSequence = refGenome, 
                         querySequences = queryGenomes,
                         outfile = OF)
+                    plotlyRV <- NULL
                 },
             "rdata" =
                 {
@@ -201,6 +204,7 @@ shinyServer(function(input, output, session) {
             # Data preparation 
             #===================================================================
             Nto1_list <- genomes$genomesNto1
+            Nto1_list$plot <- plotlyRV
             save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
             rm(Nto1_list)
             

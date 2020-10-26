@@ -3,13 +3,11 @@ observeEvent(rvEnvent$load, {
     output$sidebar <- renderUI({
       sidebarMenu( id = "tabs",
                    menuItem("Home", tabName = "home", icon = icon("file-import")),
-                   if( input$dataset !="rdata"){
-                     menuItem("Filters",icon = icon("filter"), 
-                              menuSubItem("Genomes", tabName = "genomeFilters"),
-                              menuSubItem("Genes", tabName = "annotFilters"))
-                   },
+                   if( input$dataset =="input"){
+                     menuItem("Filters",tabName = "sequenceFilters", icon = icon("filter"))
+                     },
                    menuItem("Summary", tabName = "resume", icon = icon("file")),
-                   menuItem("Graphic", tabName = "graphic", icon = icon("chart-area")),
+                   menuItem("PIP profile", tabName = "graphic", icon = icon("chart-area")),
                    menuItem("Score", tabName = "tableResults", icon = icon("table")),
                    menuItem("Alignment", tabName = "alignmentTabItem", icon = icon("equals")),
                    if( !is.null(rvAnnotation$annotation)){

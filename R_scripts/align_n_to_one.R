@@ -54,15 +54,11 @@ alignNtoOne <- function(refSequence,
                  }
                })
   
-  
-  
   if (sortByPIP) {
     PIPorder <- order(alignmentStats$pid, decreasing = TRUE)
     alignmentStats <- alignmentStats[PIPorder, ]
     alignments <- alignments[PIPorder]
-    # names(alignments)
   }
-  
   
   ## Prepare the result object
   result <- list(alignments = alignments,

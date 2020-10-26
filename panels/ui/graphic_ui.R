@@ -3,10 +3,10 @@ graphic <- fluidPage(
   uiOutput("plotArea"), 
 
   div(id = "geneExplore", style="display : none;", 
-      h2(tagList(shiny::icon("search"), "Gene exploration")), 
+      h2(tagList(shiny::icon("search"), "Feature exploration")), 
       fluidRow(
         column(4, 
-               selectizeInput("geneExplore_selector", "Select gene", 
+               selectizeInput("geneExplore_selector", "Select feature", 
                               width = "100%", choices = NULL, 
                               selected = NULL, multiple = FALSE)
         ), 
@@ -17,9 +17,8 @@ graphic <- fluidPage(
                uiOutput("resumeGene_attributes")
         )
       ), 
-      actionButton("updateGenes", label = "Search", icon = icon("search"))
+      actionButton("updateGenes", label = "Focus", icon = icon("search"))
   ), 
-  
   
   h2(tagList(shiny::icon("gear"), "Settings")), 
   
@@ -27,9 +26,9 @@ graphic <- fluidPage(
          # Title can include an icon
          title = NULL,
          tabPanel("General",
-                  h4("Reverse plot : "),
+                  h4("Closest sequence on top"),
                   switchInput(inputId = "reversePlot",NULL,  value = TRUE), 
-                  h4("Plot dynamic: "),
+                  h4("Dynamic plot "),
                   switchInput(inputId = "dynamicPlot",NULL,  value = FALSE),
                   h4("Window size:"),
                   numericInput("windowSize", label = NULL, value = 500, step = 50), 
@@ -95,10 +94,8 @@ graphic <- fluidPage(
   fluidRow(column(4,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300 )),
            column(4, selectInput("ggsave_format", label = "Format", 
                                  choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
-                                 selected = "png"))), 
-  downloadButton('downloadPlot','Download Plot')
-  
-  
+                                 selected = "png")),
+           column(4, downloadButton('downloadPlot','Download Plot'))), 
 )
 
 

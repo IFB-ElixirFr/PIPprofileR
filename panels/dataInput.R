@@ -41,7 +41,8 @@ output$dataUI <- renderUI({
     "demo" = selectInput(
       inputId = "demo",
       label = "Select a demo dataset",
-      choices = c("Sallar et al., 2020" = "Sallar")
+      choices = c("Spike proteins around SARS-CoV-2" = "spike_CoV-2", 
+                  "Genomes around SARS-CoV-2" = "genome_CoV-2")
     ),
     "input" = tags$div(
       
@@ -89,15 +90,47 @@ observeEvent(input$okData, {
     "demo" =
       {
         message <- as.character(input$demo)
-        load("dataExample/article.Rdata")
+        if( input$demo == "spike_CoV-2"  ){
+          load("dataExample/spike_proteins_around-CoV-2.Rdata")
+        } else if (input$demo == "genome_CoV-2"){
+          load("dataExample/genomes_around-CoV-2.Rdata")
+        }
+        
         genomes$genomesNto1 <- Nto1_list
+        
+        plotlyRV$p = Nto1_list$plot$p
+        plotlyRV$plotGG = Nto1_list$plot$plotGG
+        plotlyRV$colors = Nto1_list$plot$colors
+        
+        plotlyRV$title_main = Nto1_list$plot$title_main
+        plotlyRV$title_x = Nto1_list$plot$title_x
+        plotlyRV$title_y = Nto1_list$plot$title_y
+        plotlyRV$title_legende = Nto1_list$plot$title_legende
+        
+        plotlyRV$xlim =  Nto1_list$plot$xlim
+        plotlyRV$ylim =  Nto1_list$plot$ylim
+        
+        plotlyRV$colMinorH = Nto1_list$plot$colMinorH 
+        plotlyRV$sizeMinorH = Nto1_list$plot$sizeMinorH 
+        plotlyRV$colMajorH = Nto1_list$plot$colMajorH 
+        plotlyRV$sizeMajorH = Nto1_list$plot$sizeMajorH 
+        plotlyRV$colMinorV = Nto1_list$plot$colMinorV 
+        plotlyRV$sizeMinorV = Nto1_list$plot$sizeMinorV 
+        plotlyRV$colMajorV = Nto1_list$plot$colMajorV 
+        plotlyRV$sizeMajorV = Nto1_list$plot$sizeMajorV
+        
+        plotlyRV$spaceMajorH = Nto1_list$plot$spaceMajorH 
+        plotlyRV$spaceMinorH = Nto1_list$plot$spaceMinorH 
+        plotlyRV$spaceMajorV = Nto1_list$plot$spaceMajorV 
+        plotlyRV$spaceMinorV = Nto1_list$plot$spaceMinorV
+        
         rm(Nto1_list)
         updateTabItems(session, "tabs", selected = "resume")
       },
     "input" =
       {
         message <- as.character(input$fileBiom$name)
-        updateTabItems(session, "tabs", selected = "genomeFilters")
+        updateTabItems(session, "tabs", selected = "sequenceFilters")
       },
     "rdata" =
       {
@@ -105,7 +138,33 @@ observeEvent(input$okData, {
         if (!is.null(input$fileRData)){
           load(input$fileRData$datapath)
           genomes$genomesNto1 <- Nto1_list
-          plotlyRV = Nto1_list$plot
+          
+          plotlyRV$p = Nto1_list$plot$p
+          plotlyRV$plotGG = Nto1_list$plot$plotGG
+          plotlyRV$colors = Nto1_list$plot$colors
+          
+          plotlyRV$title_main = Nto1_list$plot$title_main
+          plotlyRV$title_x = Nto1_list$plot$title_x
+          plotlyRV$title_y = Nto1_list$plot$title_y
+          plotlyRV$title_legende = Nto1_list$plot$title_legende
+          
+          plotlyRV$xlim =  Nto1_list$plot$xlim
+          plotlyRV$ylim =  Nto1_list$plot$ylim
+          
+          plotlyRV$colMinorH = Nto1_list$plot$colMinorH 
+          plotlyRV$sizeMinorH = Nto1_list$plot$sizeMinorH 
+          plotlyRV$colMajorH = Nto1_list$plot$colMajorH 
+          plotlyRV$sizeMajorH = Nto1_list$plot$sizeMajorH 
+          plotlyRV$colMinorV = Nto1_list$plot$colMinorV 
+          plotlyRV$sizeMinorV = Nto1_list$plot$sizeMinorV 
+          plotlyRV$colMajorV = Nto1_list$plot$colMajorV 
+          plotlyRV$sizeMajorV = Nto1_list$plot$sizeMajorV
+          
+          plotlyRV$spaceMajorH = Nto1_list$plot$spaceMajorH 
+          plotlyRV$spaceMinorH = Nto1_list$plot$spaceMinorH 
+          plotlyRV$spaceMajorV = Nto1_list$plot$spaceMajorV 
+          plotlyRV$spaceMinorV = Nto1_list$plot$spaceMinorV
+          
           rm(Nto1_list)
           updateTabItems(session, "tabs", selected = "resume")
         }
