@@ -78,6 +78,7 @@ source("panels/ui/tableResults_ui.R", local = TRUE)
 source("panels/ui/resume_ui.R", local = TRUE)
 source("panels/ui/annotationTabItem_ui.R", local = TRUE)
 source("panels/ui/alignmentTabItem_ui.R", local = TRUE)
+source("panels/ui/helpPage_ui.R", local = TRUE)
 
 ################################################################################
 ###                              MAIN                                        ###
@@ -89,16 +90,7 @@ shinyUI(
         title = "PIPprofileR",
         header = dashboardHeaderPlus(title = "PIPprofileR",
                                      left_menu = tagList(
-                                         actionButton("dataButton", 
-                                                      "Select your data", 
-                                                      icon = icon("upload"),
-                                                      width = 200
-                                         ),
-                                         actionButton("annotButton", 
-                                                      "Import annotation", 
-                                                      icon = icon("upload"),
-                                                      width = 200
-                                         ),
+                                         
                                         
                                          downloadButton("downloadData", label = "Download", style = "width:200px;margin: 0px; padding : 6px 12px !important; display: block; color: #444 !important;")
                                      ),
@@ -139,7 +131,8 @@ shinyUI(
                 tabItem("graphic",graphic), 
                 tabItem("alignmentTabItem",alignmentTabItem), 
                 tabItem("annotationTabItem", annotationTabItem), 
-                tabItem("about", about)
+                tabItem("about", about), 
+                tabItem("helpPage", helpPage)
             )
         )
     )

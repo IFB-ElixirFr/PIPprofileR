@@ -11,7 +11,7 @@ dataInput <- function(failed = FALSE) {
     }, 
     
     helpText("Firstly, you should select a demo dataset or upload a FASTA file.
-    Make sure that the phyloseq object in the RData file is called `data`."),
+    Make sure that the object in the RData file is called `Nto1_list`."),
     
     radioButtons(
       inputId = "dataset",

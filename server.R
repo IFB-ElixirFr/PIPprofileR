@@ -82,7 +82,7 @@ shinyServer(function(input, output, session) {
     # Modal part - Import data & annotation
     #===========================================================================
     
-    showModal(dataInput())
+    # showModal(dataInput())
     
     observeEvent(input$dataButton, {
         showModal(dataInput())

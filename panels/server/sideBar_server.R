@@ -13,7 +13,8 @@ observeEvent(rvEnvent$load, {
                    if( !is.null(rvAnnotation$annotation)){
                      menuItem("Annotations", tabName ="annotationTabItem", icon = icon("pen"))
                    },
-                   menuItem("About", tabName = "about", icon = icon("cubes"))
+                   menuItem("Session", tabName = "about", icon = icon("cubes")), 
+                   menuItem("Help", tabName = "helpPage", icon = icon("question-circle")) 
       )
     })
     
@@ -21,7 +22,8 @@ observeEvent(rvEnvent$load, {
     output$sidebar <- renderUI({
       sidebarMenu(id = "tabs",
                   menuItem("Home", tabName = "home", icon = icon("file-import")),
-                  menuItem("About", tabName = "about", icon = icon("cubes"))
+                  menuItem("About", tabName = "about", icon = icon("cubes")), 
+                  menuItem("Help", tabName = "helpPage", icon = icon("question-circle"))
       )
     })
     updateTabItems(session, "tabs", selected = "home")
