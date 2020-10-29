@@ -19,3 +19,7 @@ h2 {
   color: white;
   font-weight: bold;
 }
+
+.widget-user {
+  box-shadow: 0px !important;
+}
