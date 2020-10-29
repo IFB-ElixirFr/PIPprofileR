@@ -18,13 +18,18 @@ output$refSizeAlignemnt_ui <- renderUI(
 output$resultNto1 <-  renderDataTable({
   if(!is.null(genomes$genomesNto1)){
     for(i in 1:length(genomes$genomesNto1$alignments)){
-      seq <- c(aligned(pattern(genomes$genomesNto1$alignments[[i]])), aligned(subject(genomes$genomesNto1$alignments[[i]]))) 
+      if(genomes$genomesNto1$seqType == "DNA"){
+        seq <- c(aligned(pattern(genomes$genomesNto1$alignments[[i]])), aligned(subject(genomes$genomesNto1$alignments[[i]]))) 
+      } else {
+        seq <- c(AAStringSet(pattern(genomes$genomesNto1$alignments[[i]])), AAStringSet(subject(genomes$genomesNto1$alignments[[i]]))) 
+      }
+      names(seq) = c(names(genomes$genomesNto1$reference), names(genomes$genomesNto1$alignments)[[i]])
       BrowseSeqs(seq, htmlFile = paste0(tmpFolder, "/BrowseSeqs/BrowseSeqs_",names(genomes$genomesNto1$alignments)[[i]],".html"),
                  openURL = F)
     }
     
     genomes$genomesNto1$stats %>%  arrange(desc(score))  %>% mutate(rn = rownames(genomes$genomesNto1$stats), 
-                                Explore = paste0("<a href='",paste0(tmpFolderWithoutWWW, "/BrowseSeqs/BrowseSeqs_",rn,".html"),"' target='_blank'>Go to browser !</a>")) %>%
+                                                                    Explore = paste0("<a href='",paste0(tmpFolderWithoutWWW, "/BrowseSeqs/BrowseSeqs_",rn,".html"),"' target='_blank'>Go to browser !</a>")) %>%
       column_to_rownames('rn')
   } else {
     NULL

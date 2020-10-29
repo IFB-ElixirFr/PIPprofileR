@@ -32,9 +32,20 @@ dataInput <- function(failed = FALSE) {
   )
 }
 
+
+################################################################################
+# Render UI
+################################################################################
 output$dataUI <- renderUI({
   if (is.null(input$dataset))
     return()
+  
+  switch(
+    input$dataset,
+    "demo" = enable("okData"),
+    "input" = disable("okData"),
+    "rdata" = disable("okData")
+  )
   
   switch(
     input$dataset,
@@ -52,6 +63,11 @@ output$dataUI <- renderUI({
                 placeholder = "No file selected",
                 accept = c(".fasta", ".fa")),
       
+      h4("The nature of the sequence"),
+      radioButtons("seqType", NULL,inline = T, 
+                   c("DNA" = "DNA",
+                     "Protein" = "AA"),
+                   selected = "DNA"), 
       h4("Summary"),
       DTOutput('previewFasta')
 
@@ -83,6 +99,59 @@ selection = 'none', escape = FALSE,
 options = list(pageLength = 5, scrollX = TRUE)
 )
 
+################################################################################
+# READ FASTA
+################################################################################
+
+observeEvent({
+  input$file
+  input$seqType
+},{
+  
+  if(!is.null(input$file)){
+    if(input$seqType == "DNA"){
+      genomes$Sequences <- readDNAStringSet(filepath = input$file$datapath, 
+                                            format = "fasta")
+    } else {
+      genomes$Sequences <- readAAStringSet(filepath = input$file$datapath, 
+                                           format = "fasta")
+    }
+    
+    genomes$oldNames <- as.data.frame(genomes$Sequences@ranges)$names
+    names(genomes$Sequences) <- sub(pattern = " .*", 
+                                    replacement = "",
+                                    x = names(genomes$Sequences), 
+                                    perl = TRUE)
+    genomes$genomeNames <- names(genomes$Sequences)
+    genomes$nbGenomes <- length(genomes$genomeNames)
+    genomes$genomeSizes <- as.data.frame(genomes$Sequences@ranges)$width
+    message("Loaded ", genomes$nbGenomes, " genomes from file ", 
+            input$file$name)
+    enable("okData")
+  }
+  
+})
+
+observeEvent(genomes$genomeNames, {
+  updateSelectizeInput(session, "refPattern", 
+                       choices =  setNames(genomes$genomeNames, 
+                                           genomes$genomeNames),
+                       selected = genomes$genomeNames[1])
+})
+
+observeEvent({
+  input$fileRData
+},{
+  
+  if(!is.null(input$fileRData)){
+    enable("okData")
+  }
+  
+})
+
+################################################################################
+# READ sequence
+################################################################################
 
 observeEvent(input$okData, {
   switch(
@@ -107,22 +176,23 @@ observeEvent(input$okData, {
         plotlyRV$title_y = Nto1_list$plot$title_y
         plotlyRV$title_legende = Nto1_list$plot$title_legende
         
+        plotlyRV$refPositions = Nto1_list$plot$refPositions
         plotlyRV$xlim =  Nto1_list$plot$xlim
         plotlyRV$ylim =  Nto1_list$plot$ylim
         
-        plotlyRV$colMinorH = Nto1_list$plot$colMinorH 
-        plotlyRV$sizeMinorH = Nto1_list$plot$sizeMinorH 
-        plotlyRV$colMajorH = Nto1_list$plot$colMajorH 
-        plotlyRV$sizeMajorH = Nto1_list$plot$sizeMajorH 
-        plotlyRV$colMinorV = Nto1_list$plot$colMinorV 
-        plotlyRV$sizeMinorV = Nto1_list$plot$sizeMinorV 
-        plotlyRV$colMajorV = Nto1_list$plot$colMajorV 
-        plotlyRV$sizeMajorV = Nto1_list$plot$sizeMajorV
+        plotlyRV$colMinorX = Nto1_list$plot$colMinorX
+        plotlyRV$sizeMinorX = Nto1_list$plot$sizeMinorX 
+        plotlyRV$colMajorX = Nto1_list$plot$colMajorX
+        plotlyRV$sizeMajorX = Nto1_list$plot$sizeMajorX 
+        plotlyRV$colMinorY = Nto1_list$plot$colMinorY
+        plotlyRV$sizeMinorY = Nto1_list$plot$sizeMinorY 
+        plotlyRV$colMajorY = Nto1_list$plot$colMajorY
+        plotlyRV$sizeMajorY = Nto1_list$plot$sizeMajorY
         
-        plotlyRV$spaceMajorH = Nto1_list$plot$spaceMajorH 
-        plotlyRV$spaceMinorH = Nto1_list$plot$spaceMinorH 
-        plotlyRV$spaceMajorV = Nto1_list$plot$spaceMajorV 
-        plotlyRV$spaceMinorV = Nto1_list$plot$spaceMinorV
+        plotlyRV$spaceMajorX = Nto1_list$plot$spaceMajorX 
+        plotlyRV$spaceMinorX = Nto1_list$plot$spaceMinorX 
+        plotlyRV$spaceMajorY = Nto1_list$plot$spaceMajorY 
+        plotlyRV$spaceMinorY = Nto1_list$plot$spaceMinorY
         
         rm(Nto1_list)
         updateTabItems(session, "tabs", selected = "resume")
@@ -148,22 +218,23 @@ observeEvent(input$okData, {
           plotlyRV$title_y = Nto1_list$plot$title_y
           plotlyRV$title_legende = Nto1_list$plot$title_legende
           
+          plotlyRV$refPositions = Nto1_list$plot$refPositions
           plotlyRV$xlim =  Nto1_list$plot$xlim
           plotlyRV$ylim =  Nto1_list$plot$ylim
           
-          plotlyRV$colMinorH = Nto1_list$plot$colMinorH 
-          plotlyRV$sizeMinorH = Nto1_list$plot$sizeMinorH 
-          plotlyRV$colMajorH = Nto1_list$plot$colMajorH 
-          plotlyRV$sizeMajorH = Nto1_list$plot$sizeMajorH 
-          plotlyRV$colMinorV = Nto1_list$plot$colMinorV 
-          plotlyRV$sizeMinorV = Nto1_list$plot$sizeMinorV 
-          plotlyRV$colMajorV = Nto1_list$plot$colMajorV 
-          plotlyRV$sizeMajorV = Nto1_list$plot$sizeMajorV
+          plotlyRV$colMinorX = Nto1_list$plot$colMinorX
+          plotlyRV$sizeMinorX = Nto1_list$plot$sizeMinorX 
+          plotlyRV$colMajorX = Nto1_list$plot$colMajorX
+          plotlyRV$sizeMajorX = Nto1_list$plot$sizeMajorX 
+          plotlyRV$colMinorY = Nto1_list$plot$colMinorY
+          plotlyRV$sizeMinorY = Nto1_list$plot$sizeMinorY 
+          plotlyRV$colMajorY = Nto1_list$plot$colMajorY
+          plotlyRV$sizeMajorY = Nto1_list$plot$sizeMajorY
           
-          plotlyRV$spaceMajorH = Nto1_list$plot$spaceMajorH 
-          plotlyRV$spaceMinorH = Nto1_list$plot$spaceMinorH 
-          plotlyRV$spaceMajorV = Nto1_list$plot$spaceMajorV 
-          plotlyRV$spaceMinorV = Nto1_list$plot$spaceMinorV
+          plotlyRV$spaceMajorX = Nto1_list$plot$spaceMajorX 
+          plotlyRV$spaceMinorX = Nto1_list$plot$spaceMinorX 
+          plotlyRV$spaceMajorY = Nto1_list$plot$spaceMajorY 
+          plotlyRV$spaceMinorY = Nto1_list$plot$spaceMinorY
           
           rm(Nto1_list)
           updateTabItems(session, "tabs", selected = "resume")

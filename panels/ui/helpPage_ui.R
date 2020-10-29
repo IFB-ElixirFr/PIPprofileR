@@ -17,7 +17,7 @@ helpPage <- fluidPage(
     collapsible = FALSE,
     collapsed = FALSE,
     closable = FALSE, 
-    style = "border : solid 1px #3c8dbc!important", 
+    style = "border : solid 1px #3c8dbc!important ; box-shadow:0px ;", 
     div( style="text-align:center; margin-top :37px ; font-size: 35px;", 
          
          shiny::a(icon("orcid"), 
@@ -48,7 +48,7 @@ helpPage <- fluidPage(
     collapsible = FALSE,
     collapsed = FALSE,
     closable = FALSE, 
-    style = "border : solid 1px #3c8dbc!important", 
+    style = "border : solid 1px #3c8dbc!important ; box-shadow:0px ;", 
     div( style="text-align:center; margin-top :37px ; font-size: 35px;", 
          
          shiny::a(icon("orcid"), 
@@ -77,7 +77,7 @@ helpPage <- fluidPage(
     collapsible = FALSE,
     collapsed = FALSE,
     closable = FALSE, 
-    style = "border : solid 1px #3c8dbc!important", 
+    style = "border : solid 1px #3c8dbc!important ; box-shadow:0px ;", 
     div( style="text-align:center; margin-top :37px ; font-size: 35px;", 
          
          shiny::a(icon("orcid"), 

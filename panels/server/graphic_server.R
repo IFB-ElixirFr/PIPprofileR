@@ -17,7 +17,7 @@ output$plotArea <- renderUI(
   } else if( is.null(rvAnnotation$annotation )) {
     withLoader(plotOutput("plotGGPLOT", height = "500px"))
   } else {
-    withLoader(girafeOutput("plotGGPLOT_ggiraph",  height = "100%"))
+    withLoader(girafeOutput("plotGGPLOT_ggiraph", width = "100%", height = "500px"))
   }
   
 )
@@ -35,28 +35,62 @@ output$plotArea_title <- renderUI(
 )
 
 output$resumeGene_general <- renderUI({ 
-  div(
-    h4("General information"), 
-    p(tags$b("Sequence ID: "), rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(seqid),tags$br(),
-      tags$b("Source: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(source),tags$br(),
-      tags$b("Start: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(start),tags$br(),
-      tags$b("End: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(end),tags$br(),
-      tags$b("Score: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(end),tags$br(),
-      tags$b("Strand: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(strand),tags$br(),
-      tags$b("phase: "),rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(phase)),tags$br()
-  )
+  if(input$geneExplore_selector != "All"){
+    
+    inter = rvAnnotation$feature  %>% filter(featureName == input$geneExplore_selector)
+    para = NULL
+    for(i in 1:nrow(inter)){
+      para = c(para, as.character(p(tags$b(tags$u(paste("Occurence ", i ))),tags$br(),
+                                    tags$b("Sequence ID: "), inter$seqid[i],tags$br(),
+                                    tags$b("Source: "),inter$source[i],tags$br(),
+                                    tags$b("Start: "),inter$start[i],tags$br(),
+                                    tags$b("End: "),inter$end[i],tags$br(),
+                                    tags$b("Score: "),inter$end[i],tags$br(),
+                                    tags$b("Strand: "),inter$strand[i],tags$br(),
+                                    tags$b("phase: "),inter$phase[i])))
+      
+    }
+    para = paste0(para, collapse = "")
+    
+    div(
+      h4("General information"), 
+      HTML(para)
+    )
+  } else {
+    div(
+      h4("General information")
+    )
+  }
   
 })
 
 output$resumeGene_attributes <- renderUI({
-  div(
-    h4("Attributes"), 
-    p(HTML(rvAnnotation$Gene  %>% filter(geneName == input$geneExplore_selector) %>% pull(attrtibuteHTML)))
-  )
+  
+  if(input$geneExplore_selector != "All"){
+    
+    inter = rvAnnotation$feature  %>% filter(featureName == input$geneExplore_selector) %>% pull(attrtibuteHTML)
+    para = NULL
+    for(i in 1:length(inter)){
+      para = c(para, as.character(p(tags$b(tags$u(paste("Occurence ", i ))),tags$br(),
+                                    HTML(inter[i]))))
+      
+    }
+    para = paste0(para, collapse = "")
+    
+    div(
+      h4("Attributes"), 
+      HTML(para)
+    )
+  } else {
+    div(
+      h4("Attributes")
+    )
+  }
+  
 })
 
 ################################################################################
-# Generate plotly
+# Generate plot
 ################################################################################
 
 observe({
@@ -66,18 +100,23 @@ observe({
       ggtitle(plotlyRV$title_main) + 
       scale_color_manual(values= plotlyRV$colors) + 
       theme(panel.background = element_rect(fill = "white", colour = "white"),
-            panel.grid.minor.y = element_line(colour=plotlyRV$colMinorH, size=plotlyRV$sizeMinorH) , 
-            panel.grid.major.y = element_line(colour=plotlyRV$colMajorH, size=plotlyRV$sizeMajorH), 
-            panel.grid.minor.x = element_line(colour=plotlyRV$colMinorV, size=plotlyRV$sizeMinorV) , 
-            panel.grid.major.x = element_line(colour=plotlyRV$colMajorV, size=plotlyRV$sizeMajorV),
-            legend.key=element_blank()) +
+            panel.grid.minor.y = element_line(colour=plotlyRV$colMinorY, size=plotlyRV$sizeMinorY) , 
+            panel.grid.major.y = element_line(colour=plotlyRV$colMajorY, size=plotlyRV$sizeMajorY), 
+            panel.grid.minor.x = element_line(colour=plotlyRV$colMinorX, size=plotlyRV$sizeMinorX) , 
+            panel.grid.major.x = element_line(colour=plotlyRV$colMajorX, size=plotlyRV$sizeMajorX),
+            legend.key=element_blank(), 
+            plot.title = element_text(size = 16, face = "bold"),
+            axis.text=element_text(size=12),
+            axis.title=element_text(size=14,face="bold"), 
+            legend.title = element_text(size=14,face="bold"),
+            legend.text = element_text(size=12)) +
       scale_x_continuous( name= plotlyRV$title_x , limits=plotlyRV$xlim ,
-                          breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMajorH), 
-                          minor_breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMinorH))  +
+                          breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMajorX), 
+                          minor_breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMinorX))  +
       scale_y_continuous( name=plotlyRV$title_y, 
                           limits=plotlyRV$ylim , 
-                          breaks = seq(0, 100, plotlyRV$spaceMajorV),
-                          minor_breaks = seq(0, 100, plotlyRV$spaceMinorV)) + 
+                          breaks = seq(0, 100, plotlyRV$spaceMajorY),
+                          minor_breaks = seq(0, 100, plotlyRV$spaceMinorY)) + 
       labs(color=plotlyRV$title_legende) 
   }
 })
@@ -87,7 +126,61 @@ output$plotPLOTLY <- renderPlotly({
   if(!is.null(genomes$genomesNto1$alignments) & input$dynamicPlot) {
     
     if(!is.null(rvAnnotation$annotation )){
+      p2 <- plot_ly() 
       
+      inter <- subset(rvAnnotation$annotation, type == input$typeSelector)
+      
+      for(i in 1:nrow(inter)){
+        
+        position_inter = c(as.numeric(as.character(inter$start[i])),
+                           as.numeric(as.character(inter$end[i])))
+        
+        texteinter = unlist(strsplit(unlist(strsplit(inter$attributes[i], ";")), '='))
+        texte = texteinter[seq(2,length(texteinter), 2)]
+        names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
+        
+        texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
+        
+        if(inter$strand[i] == "+"){
+          
+          p2 <- add_trace(p2,
+                          x = position_inter,
+                          y = rep(0,2) ,
+                          type="scatter",
+                          mode = 'lines+markers',
+                          symbol = I(15),
+                          marker = list(
+                            color = '#a37800',
+                            size = 20,
+                            symbol = c('triangle-right', 'triangle-left')
+                          ),
+                          line = list(color = 'orange', width = 8),
+                          text = texte ,
+                          hoverinfo = 'text',
+                          showlegend = F
+                          
+          )
+        } else {
+          p2 <- add_trace(p2, type="scatter", 
+                          x = position_inter,
+                          y = rep(-1,2) ,
+                          type="scatter",
+                          mode = 'lines+markers',
+                          symbol = I(15),
+                          marker = list(
+                            color = '#8800a3',
+                            size = 20,  
+                            symbol = c('triangle-right', 'triangle-left')
+                          ),
+                          line = list(color = 'purple', width = 8),
+                          text = texte ,
+                          hoverinfo = 'text',
+                          showlegend = F
+          )
+        }
+        
+        plotlyRV$p2 <- p2
+      } 
       subplot(ggplotly(plotlyRV$plotGG)  %>%
                 layout(hovermode = "x unified")
               , 
@@ -128,18 +221,61 @@ output$plotGGPLOT <- renderPlot({
 
 
 output$plotGGPLOT_ggiraph <- renderGirafe({
-  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & !is.null(rvAnnotation$annotation )) {
+  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & !is.null(rvAnnotation$annotation) & !is.null(input$typeSelector)) {
     
-    annotationTable <- subset(rvAnnotation$annotation, type == "gene")
+    annotationTable <- subset(rvAnnotation$annotation, type == input$typeSelector)
+    annotationTable$attributes = unlist(lapply(annotationTable$attributes, function(x){
+      texteinter = unlist(strsplit(unlist(strsplit(x, ";")), '='))
+      texte = texteinter[seq(2,length(texteinter), 2)]
+      names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
+      texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
+    }))
     
+    
+    levelAnnot <- vector(mode = "list", length = 5)
+    names(levelAnnot) <- 0:4
+    annotationTable <- annotationTable %>% arrange(start)
+    for(i in 1:nrow(annotationTable)){
+      
+      if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[1]]])){
+        levelAnnot[[1]] = c(levelAnnot[[1]], i)
+      } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[2]]])) {
+        levelAnnot[[2]] = c(levelAnnot[[2]], i)
+      }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[3]]])) {
+        levelAnnot[[3]] = c(levelAnnot[[3]], i)
+      }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[4]]])) {
+        levelAnnot[[4]] = c(levelAnnot[[4]], i)
+      }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[5]]])) {
+        levelAnnot[[5]] = c(levelAnnot[[5]], i)
+      } else {
+        levelAnnot[[1]] = c(levelAnnot[[1]], i)
+      }
+    }
+    
+    annotationTable$y = rep(names(levelAnnot), lengths(levelAnnot))
+    annotationTable = annotationTable %>%
+      mutate(arrowEnd = case_when(strand == "+" ~ "last", 
+                                  strand == "-" ~ "first"), 
+             color = case_when(strand == "+" ~ "blue", 
+                               strand == "-" ~ "orange" 
+                               
+             ))
+    write.table(annotationTable, "test.txt")
     p <- plotlyRV$plotGG +
-      geom_segment_interactive(data=annotationTable, mapping=aes(x=start, y=1,
-                                                                 xend=end, 
-                                                                 yend=1, 
-                                                                 tooltip = attributes),
-                               arrow=grid::arrow(length = grid::unit(0.03, "npc")),
-                               size=2, color="blue")
-    girafe(ggobj = p, width_svg = 12)
+      geom_segment_interactive(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
+                                                       xend=end,
+                                                       yend=(as.numeric(y)*(3)),
+                                                       tooltip = attributes),
+                               arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
+                                                 type = "closed", ends = as.character(annotationTable$arrowEnd)),
+                               size=2, color=as.character(annotationTable$color))
+    
+    
+    girafe(ggobj = p,  width_svg = ((input$dimensionGgiraph[1]/96) * 1.33) , # convert pixel to inch + 1.33 because ggiraph
+           height_svg = (5.2 * 1.33) , 
+           options = list(
+             opts_sizing(rescale = FALSE) )
+    )
   } else {
     NULL
   }
@@ -157,14 +293,12 @@ observeEvent(input$speciesColor_name, {
 
 observeEvent(rvAnnotation$annotation, {
   if(!is.null(rvAnnotation$annotation)){
-    
     updateSelectInput(session, "geneExplore_selector", 
-                      choices = c(All = "All", setNames(rvAnnotation$Gene$geneName, 
-                                                        rvAnnotation$Gene$geneName)),
+                      choices = c(All = "All", setNames(rvAnnotation$feature$featureName, 
+                                                        rvAnnotation$feature$featureName)),
                       selected = "All"
     )
   }
-  rm(inter)
 })
 
 
@@ -194,8 +328,8 @@ observeEvent(input$updateGenes, {
     plotlyRV$xlim = c(0, 
                       length(plotlyRV$refPositions))
   } else {
-    plotlyRV$xlim = sort(c(as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(start)),
-                           as.numeric(rvAnnotation$Gene %>% filter(geneName == input$geneExplore_selector) %>% pull(end))))
+    plotlyRV$xlim = sort(c(min(as.numeric(rvAnnotation$feature %>% filter(featureName == input$geneExplore_selector) %>% pull(start))),
+                           max(as.numeric(rvAnnotation$feature %>% filter(featureName == input$geneExplore_selector) %>% pull(end)))))
   }
 })
 
@@ -204,19 +338,19 @@ observeEvent(input$updateColor, {
 })
 
 observeEvent(input$updateGrid, {
-  plotlyRV$colMinorH = input$colMinorH 
-  plotlyRV$sizeMinorH = input$sizeMinorH 
-  plotlyRV$colMajorH = input$colMajorH 
-  plotlyRV$sizeMajorH = input$sizeMajorH 
-  plotlyRV$colMinorV = input$colMinorV 
-  plotlyRV$sizeMinorV = input$sizeMinorV 
-  plotlyRV$colMajorV = input$colMajorV 
-  plotlyRV$sizeMajorV = input$sizeMajorV
+  plotlyRV$colMinorX = input$colMinorX
+  plotlyRV$sizeMinorX = input$sizeMinorX 
+  plotlyRV$colMajorX = input$colMajorX 
+  plotlyRV$sizeMajorX = input$sizeMajorX 
+  plotlyRV$colMinorY = input$colMinorY 
+  plotlyRV$sizeMinorY = input$sizeMinorY 
+  plotlyRV$colMajorY = input$colMajorY 
+  plotlyRV$sizeMajorY = input$sizeMajorY
   
-  plotlyRV$spaceMajorH = input$spaceMajorH 
-  plotlyRV$spaceMinorH = input$spaceMinorH 
-  plotlyRV$spaceMajorV = input$spaceMajorV 
-  plotlyRV$spaceMinorV = input$spaceMinorV
+  plotlyRV$spaceMajorX = input$spaceMajorX 
+  plotlyRV$spaceMinorX = input$spaceMinorX 
+  plotlyRV$spaceMajorY = input$spaceMajorY 
+  plotlyRV$spaceMinorY = input$spaceMinorY
 })
 
 
@@ -234,7 +368,7 @@ observeEvent({
   if(!is.null(genomes$genomesNto1$alignments)) {
     
     if(input$dataset != "input"){
-  
+      
       updateSliderInput(session, "xlimRange",
                         min = 0, max = length(plotlyRV$refPositions), 
                         value = c(plotlyRV$xlim[1], plotlyRV$xlim[2])
@@ -258,20 +392,20 @@ observeEvent({
       updateColourInput(session, "speciesColor_picker", 
                         value = as.character(plotlyRV$colors[names(plotlyRV$colors)[1]]))
       
-      updateColourInput(session, "colMinorH",value = plotlyRV$colMinorH)
-      updateColourInput(session, "colMajorH",value = plotlyRV$colMajorH)
-      updateColourInput(session, "colMinorV",value = plotlyRV$colMinorV)
-      updateColourInput(session, "colMajorV",value = plotlyRV$colMajorV )
+      updateColourInput(session, "colMinorX",value = plotlyRV$colMinorX)
+      updateColourInput(session, "colMajorX",value = plotlyRV$colMajorX)
+      updateColourInput(session, "colMinorY",value = plotlyRV$colMinorY)
+      updateColourInput(session, "colMajorY",value = plotlyRV$colMajorY )
       
-      updateNumericInput(session, "sizeMinorH", value = plotlyRV$sizeMinorH)
-      updateNumericInput(session, "sizeMajorH", value = plotlyRV$sizeMajorH)
-      updateNumericInput(session, "sizeMinorV", value = plotlyRV$sizeMinorV)
-      updateNumericInput(session, "sizeMajorV", value = plotlyRV$sizeMajorV)
-
-      updateNumericInput(session, "spaceMajorH", value = plotlyRV$spaceMajorH)
-      updateNumericInput(session, "spaceMinorH", value = plotlyRV$spaceMinorH)
-      updateNumericInput(session, "spaceMajorV", value = plotlyRV$spaceMajorV)
-      updateNumericInput(session, "spaceMinorV", value = plotlyRV$spaceMinorV)
+      updateNumericInput(session, "sizeMinorX", value = plotlyRV$sizeMinorX)
+      updateNumericInput(session, "sizeMajorX", value = plotlyRV$sizeMajorX)
+      updateNumericInput(session, "sizeMinorY", value = plotlyRV$sizeMinorY)
+      updateNumericInput(session, "sizeMajorY", value = plotlyRV$sizeMajorY)
+      
+      updateNumericInput(session, "spaceMajorX", value = plotlyRV$spaceMajorX)
+      updateNumericInput(session, "spaceMinorX", value = plotlyRV$spaceMinorX)
+      updateNumericInput(session, "spaceMajorY", value = plotlyRV$spaceMajorY)
+      updateNumericInput(session, "spaceMinorY", value = plotlyRV$spaceMinorY)
       
     } else {
       
@@ -393,20 +527,26 @@ observeEvent({
       
       plotlyRV$xlim = c(0,length(plotlyRV$refPositions))
       plotlyRV$ylim = c(0,100)
+
+      plotlyRV$colMinorX = input$colMinorX 
+      plotlyRV$sizeMinorX = input$sizeMinorX 
+      plotlyRV$colMajorX = input$colMajorX 
+      plotlyRV$sizeMajorX = input$sizeMajorX 
+      plotlyRV$colMinorY = input$colMinorY 
+      plotlyRV$sizeMinorY = input$sizeMinorY 
+      plotlyRV$colMajorY = input$colMajorY
+      plotlyRV$sizeMajorY = input$sizeMajorY
       
-      plotlyRV$colMinorH = input$colMinorH 
-      plotlyRV$sizeMinorH = input$sizeMinorH 
-      plotlyRV$colMajorH = input$colMajorH 
-      plotlyRV$sizeMajorH = input$sizeMajorH 
-      plotlyRV$colMinorV = input$colMinorV 
-      plotlyRV$sizeMinorV = input$sizeMinorV 
-      plotlyRV$colMajorV = input$colMajorV 
-      plotlyRV$sizeMajorV = input$sizeMajorV
-      
-      plotlyRV$spaceMajorH = input$spaceMajorH 
-      plotlyRV$spaceMinorH = input$spaceMinorH 
-      plotlyRV$spaceMajorV = input$spaceMajorV 
-      plotlyRV$spaceMinorV = input$spaceMinorV
+      if(length(plotlyRV$refPositions) < 5000) {
+        plotlyRV$spaceMajorX = 500
+        plotlyRV$spaceMinorX = 100
+      } else {
+        plotlyRV$spaceMajorX = 5000 
+        plotlyRV$spaceMinorX = 1000
+      }
+
+      plotlyRV$spaceMajorY = input$spaceMajorY 
+      plotlyRV$spaceMinorY = input$spaceMinorY
       
       #===========================================================================
       # Update
@@ -421,88 +561,16 @@ observeEvent({
       updateTextInput(session, "titleInput_y", value = paste0("PIP (", plotlyRV$windowSize," bp-averaged)"))
       updateTextInput(session, "titleInput_legende", value = 'Species')
       
+      updateNumericInput(session, "spaceMajorX", value = plotlyRV$spaceMajorX)
+      updateNumericInput(session, "spaceMinorX", value = plotlyRV$spaceMinorX)
+      updateNumericInput(session, "spaceMajorY", value = plotlyRV$spaceMajorY)
+      updateNumericInput(session, "spaceMinorY", value = plotlyRV$spaceMinorY)
+      
       updateSelectizeInput(session, "speciesColor_name", 
                            choices =  setNames(names(plotlyRV$colors), 
                                                names(plotlyRV$colors)),
                            selected = names(plotlyRV$colors)[1])
     }
-  }
-})
-
-
-
-output$toto <- renderPlot({
-  if( ! is.null(plotlyRV$plotGG)){
-    plotlyRV$plotGG
-  } else{
-    NULL
-  }
-})
-
-
-################################################################################
-# Generate plot - Annotation 
-################################################################################
-
-observeEvent(rvAnnotation$annotation, {
-  if(!is.null(rvAnnotation$annotation )){
-    p2 <- plot_ly() 
-    
-    inter <- subset(rvAnnotation$annotation, type=="gene" )
-    
-    for(i in 1:nrow(inter)){
-      
-      position_inter = c(as.numeric(as.character(inter$start[i])),
-                         as.numeric(as.character(inter$end[i])))
-      
-      texteinter = unlist(strsplit(unlist(strsplit(inter$attributes[i], ";")), '='))
-      texte = texteinter[seq(2,length(texteinter), 2)]
-      names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
-      
-      texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
-      
-      if(inter$strand[i] == "+"){
-        
-        p2 <- add_trace(p2,
-                        x = position_inter,
-                        y = rep(0,2) ,
-                        type="scatter",
-                        mode = 'lines+markers',
-                        symbol = I(15),
-                        marker = list(
-                          color = '#a37800',
-                          size = 20,
-                          symbol = c('triangle-right', 'triangle-left')
-                        ),
-                        line = list(color = 'orange', width = 8),
-                        text = texte ,
-                        hoverinfo = 'text',
-                        showlegend = F
-                        
-        )
-      } else {
-        p2 <- add_trace(p2, type="scatter", 
-                        x = position_inter,
-                        y = rep(-1,2) ,
-                        type="scatter",
-                        mode = 'lines+markers',
-                        symbol = I(15),
-                        marker = list(
-                          color = '#8800a3',
-                          size = 20,  
-                          symbol = c('triangle-right', 'triangle-left')
-                        ),
-                        line = list(color = 'purple', width = 8),
-                        text = texte ,
-                        hoverinfo = 'text',
-                        showlegend = F
-        )
-      }
-      
-      plotlyRV$p2 <- p2
-    }
-    rm(inter)
-    
   }
 })
 

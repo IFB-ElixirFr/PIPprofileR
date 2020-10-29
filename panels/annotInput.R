@@ -31,11 +31,11 @@ annotInput <- function(){
       label = "Select dataset : ",
       inline = TRUE,
       choices = list(
+        "Demo" = "Demo", 
         "GFF3" = "gff3",
         "GFF2 / GTF" = "gtf"
-        ,"Demo" = "Demo"
       ),
-      selected = "gff3"
+      selected = "Demo"
     ),
     
     wellPanel(uiOutput("annotUI")),
@@ -57,10 +57,18 @@ output$errorArea <- renderUI({
 })
 
 output$annotUI <- renderUI({
-  disable("okAnnot")
+
   rvAnnotation$annotationTmp  <- NULL
   if (is.null(input$annotset))
     return()
+  
+  switch(
+    input$annotset,
+    "gff3" = disable("okAnnot"),
+    "gtf" = disable("okAnnot"),
+    "Demo" = enable("okAnnot")
+  )
+  
   
   switch(
     input$annotset,
@@ -75,11 +83,10 @@ output$annotUI <- renderUI({
                       placeholder = "No file selected",
                       accept = c(".gtf", ".gff2")
     ),
-    "bed" = fileInput(
-      inputId = "fileAnnot",
-      label = "Select bed file ",
-      placeholder = "No file selected", 
-      accept = ".bed"
+    "Demo" = selectInput(
+      inputId = "demoAnnot",
+      label = "Select a demo annotation",
+      choices = c("SARS-CoV-2" = "CoV-2")
     )
   )
 })
@@ -97,11 +104,11 @@ observeEvent(input$fileAnnot, {
         rvAnnotation$annotationTmp <- read.gff(input$fileAnnot$datapath, 
                                             GFF3 = FALSE )
       },
-      "bed" = {
+      "Demo" = {
+        message("annot demo")
         
       }
     )
-    
   },
   error=function(cond) {
     rvAnnotation$annotationTmp  <- NULL
@@ -141,54 +148,13 @@ options = list(pageLength = 5, scrollX = TRUE)
 
 
 observeEvent(input$okAnnot, {
+  if(input$annotset == "Demo" & input$demoAnnot == "CoV-2" ){
+    rvAnnotation$annotationTmp <- read.gff("dataExample/GCF_009858895.2_ASM985889v3_genomic.gff", 
+                                           GFF3 = TRUE ) 
+  }
+  
   rvAnnotation$annotation <- rvAnnotation$annotationTmp
   rvAnnotation$annotationTmp <- NULL
   removeModal()
   shinyjs::show(id = "geneExplore")
-  
-  inter <- rvAnnotation$annotation  %>% filter(type == 'gene')
-  geneName <- unlist(lapply(inter$attributes, function(x){
-    gsub("ID=", "", grep("ID=", unlist(strsplit(x,";")), value = T))
-  }))
-  
-  
-  attrtibuteHTML <- unlist(lapply(inter$attributes, function(x){
-    texteinter = unlist(strsplit(unlist(strsplit(x, ";")), '='))
-    texte = texteinter[seq(2,length(texteinter), 2)]
-    names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
-    
-    pos  = which(names(texte) == 'Dbxref')
-    if(length(pos) != 0){
-      interRef <-  unlist(strsplit(unlist(strsplit(texte[pos], ":")), ','))
-      interRef_ref = interRef[seq(2,length(interRef), 2)]
-      names(interRef_ref) = interRef[seq(1,length(interRef), 2)]
-      
-      interRef_ref <- setNames(
-        unlist(lapply(seq_along(interRef_ref), function(id, n, i){
-          switch(n[[i]], 
-                 'taxon' = paste0("<span style='margin-left:20px'><i>", n[[i]], "</i> : ","<a href='https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=", id[[i]], "' target='_blank'>", id[[i]], "</a></span>"),
-                 'Genbank' = paste0("<span style='margin-left:20px'><i>",n[[i]], "</i> : ","<a href='https://www.ncbi.nlm.nih.gov/protein/", id[[i]], "' target='_blank'>",  id[[i]], "</a></span>"),
-                 'GeneID' = paste0("<span style='margin-left:20px'><i>",n[[i]], "</i> : ","<a href='https://www.ncbi.nlm.nih.gov/gene/?term=", id[[i]], "' target='_blank'>",  id[[i]], "</a></span>"),
-                 {
-                   paste0("<i>",n[[i]], "</i> : ",  id[[i]])
-                 }
-          )
-        }, id = interRef_ref, n = names(interRef_ref)
-        )), 
-        names(interRef_ref)
-      )  
-      interRef_ref = paste0(interRef_ref, collapse = "<br>")
-      interRef_ref = paste0(c("<br>", interRef_ref), collapse = "")
-      texte[pos] <- interRef_ref
-    }
-    
-    texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
-  }
-  ))
-
-  rvAnnotation$Gene <-  cbind.data.frame(inter, 
-                                         geneName, 
-                                         attrtibuteHTML)
-  
-  
 })

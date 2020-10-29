@@ -74,7 +74,6 @@ source("panels/ui/home_ui.R", local = TRUE)
 source("panels/ui/sequenceFilters_ui.R", local = TRUE)
 source("panels/ui/graphic_ui.R", local = TRUE)
 source("panels/ui/about_ui.R", local = TRUE)
-source("panels/ui/tableResults_ui.R", local = TRUE)
 source("panels/ui/resume_ui.R", local = TRUE)
 source("panels/ui/annotationTabItem_ui.R", local = TRUE)
 source("panels/ui/alignmentTabItem_ui.R", local = TRUE)
@@ -89,11 +88,6 @@ shinyUI(
     dashboardPagePlus(
         title = "PIPprofileR",
         header = dashboardHeaderPlus(title = "PIPprofileR",
-                                     left_menu = tagList(
-                                         
-                                        
-                                         downloadButton("downloadData", label = "Download", style = "width:200px;margin: 0px; padding : 6px 12px !important; display: block; color: #444 !important;")
-                                     ),
                                      dropdownMenu(icon = icon("question-circle"),badgeStatus =NULL,headerText = "Global information",
                                                   messageItem(
                                                       from = "Find our project?",
@@ -116,18 +110,38 @@ shinyUI(
                                      
         ),
         sidebar = dashboardSidebar( uiOutput('sidebar') ),
-        body = dashboardBody(
+        body = dashboardBody(id= "dashboardBody", 
             tags$head(tags$link(href = "img/logo.png",
                                 rel ="icon", type="image/png")),
             tags$head(HTML('<link rel="stylesheet" type="text/css"
-                   href="css/style.css" />')), 
+                   href="css/style.css" />')), tags$head(tags$script('
+                                var dimensionGgiraph = [0];
+                                $(document).on("shiny:connected", function(e) {
+                                    var elem = document.getElementById("dashboardBody");
+                                    if(elem) {
+                                       var rect = elem.getBoundingClientRect();
+                                       dimensionGgiraph[0] = rect.width;
+                                      
+                                      Shiny.onInputChange("dimensionGgiraph", dimensionGgiraph); 
+                                    }
+                                });
+                                $(window).resize(function(e) {
+                                    var elem = document.getElementById("dashboardBody");
+                                    if(elem) {
+                                       var rect = elem.getBoundingClientRect();
+                                       dimensionGgiraph[0] = rect.width;
+                                      Shiny.onInputChange("dimensionGgiraph", dimensionGgiraph);
+                                       
+                                    }
+                                });
+                                
+                            ')),
             useShinyjs(),
             useShinyalert(),
             tabItems(
                 tabItem("home", home),
                 tabItem("sequenceFilters", sequenceFilters),
                 tabItem("resume",resume), 
-                tabItem("tableResults",tableResults),
                 tabItem("graphic",graphic), 
                 tabItem("alignmentTabItem",alignmentTabItem), 
                 tabItem("annotationTabItem", annotationTabItem), 

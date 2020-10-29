@@ -2,7 +2,6 @@
 #' @author Jacques.van-Helden@france-bioinformatique.fr
 #' @param refSequence reference sequence. Must be an object of class Biostrings::XStringSet
 #' @param querySequences query sequences. Must be an object of class Biostrings::XStringSet
-#' @param seqType sequence type. Supported: "DNA", "AA"
 #' @param type="global-local" alignment type, passed to Biostrings::pairwiseAlignment()
 #' @param sortByPIP=TRUE sort resulting alignments by decreasing mean PIP
 #' @param outfile=NULL if specified, the alignments are savec in the speficied file
@@ -11,11 +10,11 @@
 #' @export
 alignNtoOne <- function(refSequence, 
                         querySequences, 
-                        seqType = "DNA",
                         type = "global-local",
                         sortByPIP = TRUE,
                         outfile = NULL, 
                         IDsuffix = NULL,
+                        seqType, 
                         ...) {
   ## Prepare a table for the matching statistics
   stats <-  c("pid", "nchar", "insertNb", "insertLen", "delNb", "delLen",  "score")
@@ -63,7 +62,8 @@ alignNtoOne <- function(refSequence,
   ## Prepare the result object
   result <- list(alignments = alignments,
                  stats = alignmentStats, 
-                 reference = refSequence)
+                 reference = refSequence,
+                 seqType = seqType)
   
   #### Export sequences ####
   if (!is.null(outfile)) {
@@ -83,7 +83,7 @@ alignNtoOne <- function(refSequence,
     ## Suppress the dashes from the alignment to get the raw sequence
     sequence <- as.character(subject)
     sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence)
-    seqStringSet <- BStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
+    seqStringSet <- BStringSet(x = sequenceDesaligned)
     
     
     ## Define a sequence ID for the fasta header

@@ -3,6 +3,6 @@ resume <- fluidPage(
     h2("Reference "), 
     uiOutput("refName_ui"), 
     uiOutput("refSize_ui"),
-    h2("Alignment results"), 
+    h2("Sequences information"), 
     dataTableOutput(outputId = "resumeQuery")
 )

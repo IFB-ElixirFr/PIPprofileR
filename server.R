@@ -32,7 +32,6 @@ shinyServer(function(input, output, session) {
     source("panels/server/sideBar_server.R", local = TRUE)
     source("panels/server/sequenceFilters_server.R", local = TRUE)
     source("panels/server/graphic_server.R", local = TRUE)
-    source("panels/server/tableResults_server.R", local = TRUE)
     source("panels/server/about_server.R", local = TRUE)
     source("panels/server/home_server.R", local = TRUE)
     source("panels/server/resume_server.R", local = TRUE)
@@ -70,6 +69,7 @@ shinyServer(function(input, output, session) {
         dir.create("www/tmp")
     }
     
+    wd = getwd()
     nameTmpFolder = format(Sys.time(), "%Y%m%d_%H%M%S")
     
     tmpFolder = paste0("www/tmp/",nameTmpFolder)
@@ -114,31 +114,7 @@ shinyServer(function(input, output, session) {
                         "Pi" = "Pig",
                         "Cv" = "Civet")
     
-    #===========================================================================
-    # READ FASTA
-    #===========================================================================
-    
-    observeEvent(input$file,{
-        genomes$Sequences <- readDNAStringSet(filepath = input$file$datapath, 
-                                              format = "fasta")
-        genomes$oldNames <- as.data.frame(genomes$Sequences@ranges)$names
-        names(genomes$Sequences) <- sub(pattern = " .*", 
-                                        replacement = "",
-                                        x = names(genomes$Sequences), 
-                                        perl = TRUE)
-        genomes$genomeNames <- names(genomes$Sequences)
-        genomes$nbGenomes <- length(genomes$genomeNames)
-        genomes$genomeSizes <- as.data.frame(genomes$Sequences@ranges)$width
-        message("Loaded ", genomes$nbGenomes, " genomes from file ", 
-                input$file$name)
-    })
-    
-    observeEvent(genomes$genomeNames, {
-        updateSelectizeInput(session, "refPattern", 
-                             choices =  setNames(genomes$genomeNames, 
-                                                 genomes$genomeNames),
-                             selected = genomes$genomeNames[1])
-    })
+
     
     #===========================================================================
     # Run analysis
@@ -173,8 +149,8 @@ shinyServer(function(input, output, session) {
                     genomes$genomesNto1 <- alignNtoOne(
                         refSequence = refGenome, 
                         querySequences = queryGenomes,
-                        outfile = OF)
-                    plotlyRV <- NULL
+                        outfile = OF, seqType = input$seqType)
+                    
                 },
             "rdata" =
                 {
@@ -195,11 +171,8 @@ shinyServer(function(input, output, session) {
     #===========================================================================
     
     output$downloadData <- downloadHandler(
-        filename = function() {
-            paste0(nameTmpFolder, ".zip")
-        },
+        filename = paste0(nameTmpFolder, ".zip"),
         content = function(fname) {
-            
             #===================================================================
             # Data preparation 
             #===================================================================
@@ -207,13 +180,14 @@ shinyServer(function(input, output, session) {
             Nto1_list$plot <- plotlyRV
             save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
             rm(Nto1_list)
-            
-            tmpdir <- tmpFolder
+
             oldDir <- getwd()
             setwd(tmpFolder)
             fs <- list.files()
-            zip(zipfile= fname, files=fs)
+            system(paste0("zip ",fname," " , paste0(fs , collapse = " ")))
+
             setwd(oldDir)
+
         },
         contentType = "application/zip"
     )
