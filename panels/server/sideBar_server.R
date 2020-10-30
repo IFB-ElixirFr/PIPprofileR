@@ -3,7 +3,7 @@ observeEvent(rvEnvent$load, {
     output$sidebar <- renderUI({
       sidebarMenu( id = "tabs",
                    menuItem("Import", tabName = "home", icon = icon("file-import")),
-                   if( input$dataset =="input"){
+                   if( input$dataset =="input" | (input$dataset == "demo" & input$demoType == "fasta" ) ){ 
                      menuItem("Filters",tabName = "sequenceFilters", icon = icon("filter"))
                      },
                    menuItem("Summary", tabName = "resume", icon = icon("file")),

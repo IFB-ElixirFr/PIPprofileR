@@ -49,11 +49,19 @@ output$dataUI <- renderUI({
   
   switch(
     input$dataset,
-    "demo" = selectInput(
-      inputId = "demo",
-      label = "Select a demo dataset",
-      choices = c("Spike proteins around SARS-CoV-2" = "spike_CoV-2", 
-                  "Genomes around SARS-CoV-2" = "genome_CoV-2")
+    "demo" = tags$div(
+      selectInput(
+        inputId = "demo",
+        label = "Select a demo dataset",
+        choices = c("Spike proteins around SARS-CoV-2" = "spike_CoV-2", 
+                    "Genomes around SARS-CoV-2" = "genome_CoV-2")
+      ), 
+      selectInput(
+        inputId = "demoType",
+        label = "From",
+        choices = c("Rdata file" = "rdata", 
+                    "Fasta file" = "fasta")
+      )
     ),
     "input" = tags$div(
       
@@ -70,7 +78,7 @@ output$dataUI <- renderUI({
                    selected = "DNA"), 
       h4("Summary"),
       DTOutput('previewFasta')
-
+      
     ),
     "rdata" = fileInput(
       inputId = "fileRData",
@@ -159,43 +167,84 @@ observeEvent(input$okData, {
     "demo" =
       {
         message <- as.character(input$demo)
-        if( input$demo == "spike_CoV-2"  ){
-          load("dataExample/spike_proteins_around-CoV-2.Rdata")
-        } else if (input$demo == "genome_CoV-2"){
-          load("dataExample/genomes_around-CoV-2.Rdata")
+        
+        if(input$demoType == "fasta"){
+          #=======================================================================
+          # Demo FASTA
+          #=======================================================================
+          message("In")
+          
+          
+          if(input$demo == "genome_CoV-2"){
+            genomes$Sequences <- readDNAStringSet(filepath = "dataExample/genomes_around-CoV-2.fasta", 
+                                                  format = "fasta")
+            updateRadioButtons(session, "seqType",selected = "DNA")
+            
+          } else if(input$demo == "spike_CoV-2" ) {
+            genomes$Sequences <- readAAStringSet(filepath = "dataExample/spike_proteins_around-CoV-2.fasta", 
+                                                 format = "fasta")
+            
+            updateRadioButtons(session, "seqType",selected = "AA")
+          }
+          
+          genomes$oldNames <- as.data.frame(genomes$Sequences@ranges)$names
+          names(genomes$Sequences) <- sub(pattern = " .*", 
+                                          replacement = "",
+                                          x = names(genomes$Sequences), 
+                                          perl = TRUE)
+          genomes$genomeNames <- names(genomes$Sequences)
+          genomes$nbGenomes <- length(genomes$genomeNames)
+          genomes$genomeSizes <- as.data.frame(genomes$Sequences@ranges)$width
+          message("Loaded ", genomes$nbGenomes, " genomes from file ", 
+                  input$file$name)
+          
+          updateTabItems(session, "tabs", selected = "sequenceFilters")
+          
+        } else {
+          #=====================================================================
+          # Demo Rdata
+          #=====================================================================
+          if( input$demo == "spike_CoV-2" ){
+            load("dataExample/spike_proteins_around-CoV-2.Rdata")
+          } else if (input$demo == "genome_CoV-2"){
+            load("dataExample/genomes_around-CoV-2.Rdata")
+          }
+          
+          genomes$genomesNto1 <- Nto1_list
+          
+          plotlyRV$p = Nto1_list$plot$p
+          plotlyRV$plotGG = Nto1_list$plot$plotGG
+          plotlyRV$colors = Nto1_list$plot$colors
+          
+          plotlyRV$title_main = Nto1_list$plot$title_main
+          plotlyRV$title_x = Nto1_list$plot$title_x
+          plotlyRV$title_y = Nto1_list$plot$title_y
+          plotlyRV$title_legende = Nto1_list$plot$title_legende
+          
+          plotlyRV$refPositions = Nto1_list$plot$refPositions
+          plotlyRV$xlim =  Nto1_list$plot$xlim
+          plotlyRV$ylim =  Nto1_list$plot$ylim
+          
+          plotlyRV$colMinorX = Nto1_list$plot$colMinorX
+          plotlyRV$sizeMinorX = Nto1_list$plot$sizeMinorX 
+          plotlyRV$colMajorX = Nto1_list$plot$colMajorX
+          plotlyRV$sizeMajorX = Nto1_list$plot$sizeMajorX 
+          plotlyRV$colMinorY = Nto1_list$plot$colMinorY
+          plotlyRV$sizeMinorY = Nto1_list$plot$sizeMinorY 
+          plotlyRV$colMajorY = Nto1_list$plot$colMajorY
+          plotlyRV$sizeMajorY = Nto1_list$plot$sizeMajorY
+          
+          plotlyRV$spaceMajorX = Nto1_list$plot$spaceMajorX 
+          plotlyRV$spaceMinorX = Nto1_list$plot$spaceMinorX 
+          plotlyRV$spaceMajorY = Nto1_list$plot$spaceMajorY 
+          plotlyRV$spaceMinorY = Nto1_list$plot$spaceMinorY
+          
+          plotlyRV$windowSize = Nto1_list$plot$windowSize
+          
+          rm(Nto1_list)
+          updateTabItems(session, "tabs", selected = "resume")
         }
         
-        genomes$genomesNto1 <- Nto1_list
-        
-        plotlyRV$p = Nto1_list$plot$p
-        plotlyRV$plotGG = Nto1_list$plot$plotGG
-        plotlyRV$colors = Nto1_list$plot$colors
-        
-        plotlyRV$title_main = Nto1_list$plot$title_main
-        plotlyRV$title_x = Nto1_list$plot$title_x
-        plotlyRV$title_y = Nto1_list$plot$title_y
-        plotlyRV$title_legende = Nto1_list$plot$title_legende
-        
-        plotlyRV$refPositions = Nto1_list$plot$refPositions
-        plotlyRV$xlim =  Nto1_list$plot$xlim
-        plotlyRV$ylim =  Nto1_list$plot$ylim
-        
-        plotlyRV$colMinorX = Nto1_list$plot$colMinorX
-        plotlyRV$sizeMinorX = Nto1_list$plot$sizeMinorX 
-        plotlyRV$colMajorX = Nto1_list$plot$colMajorX
-        plotlyRV$sizeMajorX = Nto1_list$plot$sizeMajorX 
-        plotlyRV$colMinorY = Nto1_list$plot$colMinorY
-        plotlyRV$sizeMinorY = Nto1_list$plot$sizeMinorY 
-        plotlyRV$colMajorY = Nto1_list$plot$colMajorY
-        plotlyRV$sizeMajorY = Nto1_list$plot$sizeMajorY
-        
-        plotlyRV$spaceMajorX = Nto1_list$plot$spaceMajorX 
-        plotlyRV$spaceMinorX = Nto1_list$plot$spaceMinorX 
-        plotlyRV$spaceMajorY = Nto1_list$plot$spaceMajorY 
-        plotlyRV$spaceMinorY = Nto1_list$plot$spaceMinorY
-        
-        rm(Nto1_list)
-        updateTabItems(session, "tabs", selected = "resume")
       },
     "input" =
       {
@@ -235,6 +284,8 @@ observeEvent(input$okData, {
           plotlyRV$spaceMinorX = Nto1_list$plot$spaceMinorX 
           plotlyRV$spaceMajorY = Nto1_list$plot$spaceMajorY 
           plotlyRV$spaceMinorY = Nto1_list$plot$spaceMinorY
+          
+          plotlyRV$windowSize = Nto1_list$plot$windowSize
           
           rm(Nto1_list)
           updateTabItems(session, "tabs", selected = "resume")

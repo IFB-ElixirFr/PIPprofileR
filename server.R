@@ -122,46 +122,26 @@ shinyServer(function(input, output, session) {
     
     observeEvent(input$Run, {
         
-        switch(
-            input$dataset,
-            "demo" =
-                {
-                    message <- as.character(input$demo)
-                },
-            "input" =
-                {
-                    genomes$strainColors <- (unlist(genomes$genomeStat$color))
-                    names(genomes$strainColors) <- row.names(genomes$genomeStat)
-                    
-                    ## Define output file for genome alignments
-                    dir.create(paste0(tmpFolder, "/Nto1_alignments"))
-                    
-                    OF <- file.path(
-                        paste0(tmpFolder, "/Nto1_alignments"), 
-                        paste0("genome_alignments_ref_", genomes$refGenomeName))
-                    
-                    ## Get sequences for reference and query genomes
-                    refGenome <- genomes$Sequences[genomes$refGenomeName ]
-                    queryGenomes <- genomes$Sequences[genomes$queryGenomeNames]
-                    
-                    message("queryGenomes :", length(queryGenomes))
-                    
-                    genomes$genomesNto1 <- alignNtoOne(
-                        refSequence = refGenome, 
-                        querySequences = queryGenomes,
-                        outfile = OF, seqType = input$seqType)
-                    
-                },
-            "rdata" =
-                {
-                    message <- as.character(input$fileRData$name)
-                    # if (!is.null(input$fileRData)){
-                    #     load(input$fileRData$datapath)
-                    #     genomes$genomesNto1 <- Nto1_list
-                    #     rm(Nto1_list)
-                    # }
-                }
-        )
+        genomes$strainColors <- (unlist(genomes$genomeStat$color))
+        names(genomes$strainColors) <- row.names(genomes$genomeStat)
+        
+        ## Define output file for genome alignments
+        dir.create(paste0(tmpFolder, "/Nto1_alignments"))
+        
+        OF <- file.path(
+            paste0(tmpFolder, "/Nto1_alignments"), 
+            paste0("genome_alignments_ref_", genomes$refGenomeName))
+        
+        ## Get sequences for reference and query genomes
+        refGenome <- genomes$Sequences[genomes$refGenomeName ]
+        queryGenomes <- genomes$Sequences[genomes$queryGenomeNames]
+        
+        message("queryGenomes :", length(queryGenomes))
+        
+        genomes$genomesNto1 <- alignNtoOne(
+            refSequence = refGenome, 
+            querySequences = queryGenomes,
+            outfile = OF, seqType = input$seqType)
         
         updateTabItems(session, "tabs", selected = "graphic")
     })

@@ -117,7 +117,8 @@ observe({
                           limits=plotlyRV$ylim , 
                           breaks = seq(0, 100, plotlyRV$spaceMajorY),
                           minor_breaks = seq(0, 100, plotlyRV$spaceMinorY)) + 
-      labs(color=plotlyRV$title_legende) 
+      labs(color=plotlyRV$title_legende) +
+      guides(color = guide_legend(override.aes = list(size = 2) ) )
   }
 })
 
@@ -367,7 +368,7 @@ observeEvent({
 } , {
   if(!is.null(genomes$genomesNto1$alignments)) {
     
-    if(input$dataset != "input"){
+    if(input$dataset == "rdata" | (input$dataset ==  "demo" & input$demoType == "rdata")){
       
       updateSliderInput(session, "xlimRange",
                         min = 0, max = length(plotlyRV$refPositions), 
@@ -406,6 +407,9 @@ observeEvent({
       updateNumericInput(session, "spaceMinorX", value = plotlyRV$spaceMinorX)
       updateNumericInput(session, "spaceMajorY", value = plotlyRV$spaceMajorY)
       updateNumericInput(session, "spaceMinorY", value = plotlyRV$spaceMinorY)
+      
+      updateNumericInput(session, "windowSize", value = plotlyRV$windowSize)
+      
       
     } else {
       
