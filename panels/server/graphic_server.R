@@ -14,11 +14,21 @@ firstup <- function(x) {
 output$plotArea <- renderUI(
   if(input$dynamicPlot){
     withLoader(plotlyOutput("plotPLOTLY", height = "500px"))
-  } else if( is.null(rvAnnotation$annotation )) {
-    withLoader(plotOutput("plotGGPLOT", height = "500px"))
   } else {
-    withLoader(girafeOutput("plotGGPLOT_ggiraph", width = "100%", height = "500px"))
+    withLoader(plotOutput("plotGGPLOT", height = "500px",
+                          hover = hoverOpts(id ="plot_hover", delay=100),
+                          click = clickOpts(id ="plot_click"),
+                          brush = brushOpts(id ="plot_brush", delay=100)))
   }
+  
+  # else if( is.null(rvAnnotation$annotation )) {
+  #   withLoader(plotOutput("plotGGPLOT", height = "500px",
+  #                         hover = hoverOpts(id ="plot_hover", delay=100),
+  #                         click = clickOpts(id ="plot_click"),
+  #                         brush = brushOpts(id ="plot_brush", delay=100)))
+  # } else {
+  #   withLoader(girafeOutput("plotGGPLOT_ggiraph", width = "100%", height = "500px"))
+  # }
   
 )
 
@@ -213,72 +223,194 @@ output$plotPLOTLY <- renderPlotly({
 })
 
 output$plotGGPLOT <- renderPlot({
-  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & is.null(rvAnnotation$annotation)) {
-    plotlyRV$plotGG
+  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot) {
+
+    if(is.null(rvAnnotation$annotation)){
+      plotlyRV$plotGG
+      
+    } else {
+      
+      annotationTable <- subset(rvAnnotation$annotation, type == input$typeSelector)
+      annotationTable$attributes = unlist(lapply(annotationTable$attributes, function(x){
+        texteinter = unlist(strsplit(unlist(strsplit(x, ";")), '='))
+        texte = texteinter[seq(2,length(texteinter), 2)]
+        names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
+        texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
+      }))
+
+      levelAnnot <- vector(mode = "list", length = 5)
+      names(levelAnnot) <- 0:4
+      annotationTable <- annotationTable %>% arrange(start)
+      for(i in 1:nrow(annotationTable)){
+        
+        if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[1]]])){
+          levelAnnot[[1]] = c(levelAnnot[[1]], i)
+        } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[2]]])) {
+          levelAnnot[[2]] = c(levelAnnot[[2]], i)
+        }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[3]]])) {
+          levelAnnot[[3]] = c(levelAnnot[[3]], i)
+        }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[4]]])) {
+          levelAnnot[[4]] = c(levelAnnot[[4]], i)
+        }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[5]]])) {
+          levelAnnot[[5]] = c(levelAnnot[[5]], i)
+        } else {
+          levelAnnot[[1]] = c(levelAnnot[[1]], i)
+        }
+      }
+      
+      annotationTable$y = rep(names(levelAnnot), lengths(levelAnnot))
+      annotationTable = annotationTable %>%
+        mutate(arrowEnd = case_when(strand == "+" ~ "last", 
+                                    strand == "-" ~ "first"), 
+               color = case_when(strand == "+" ~ "blue", 
+                                 strand == "-" ~ "orange" 
+                                 
+               ))
+      
+      plotlyRV$annotationTable = annotationTable
+      
+      plotlyRV$plotGG +
+      geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
+                                                     xend=end,
+                                                     yend=(as.numeric(y)*(3)),
+                                                     tooltip = attributes),
+                   arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
+                                     type = "closed", ends = as.character(annotationTable$arrowEnd)),
+                   size=2, color=as.character(annotationTable$color))
+      
+    }
   } else {
     NULL
   }
 })
 
 
-output$plotGGPLOT_ggiraph <- renderGirafe({
-  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & !is.null(rvAnnotation$annotation) & !is.null(input$typeSelector)) {
+# output$plotGGPLOT_ggiraph <- renderGirafe({
+#   if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & !is.null(rvAnnotation$annotation) & !is.null(input$typeSelector)) {
+#     
+#     annotationTable <- subset(rvAnnotation$annotation, type == input$typeSelector)
+#     annotationTable$attributes = unlist(lapply(annotationTable$attributes, function(x){
+#       texteinter = unlist(strsplit(unlist(strsplit(x, ";")), '='))
+#       texte = texteinter[seq(2,length(texteinter), 2)]
+#       names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
+#       texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
+#     }))
+#     
+#     
+#     levelAnnot <- vector(mode = "list", length = 5)
+#     names(levelAnnot) <- 0:4
+#     annotationTable <- annotationTable %>% arrange(start)
+#     for(i in 1:nrow(annotationTable)){
+#       
+#       if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[1]]])){
+#         levelAnnot[[1]] = c(levelAnnot[[1]], i)
+#       } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[2]]])) {
+#         levelAnnot[[2]] = c(levelAnnot[[2]], i)
+#       }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[3]]])) {
+#         levelAnnot[[3]] = c(levelAnnot[[3]], i)
+#       }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[4]]])) {
+#         levelAnnot[[4]] = c(levelAnnot[[4]], i)
+#       }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[5]]])) {
+#         levelAnnot[[5]] = c(levelAnnot[[5]], i)
+#       } else {
+#         levelAnnot[[1]] = c(levelAnnot[[1]], i)
+#       }
+#     }
+#     
+#     annotationTable$y = rep(names(levelAnnot), lengths(levelAnnot))
+#     annotationTable = annotationTable %>%
+#       mutate(arrowEnd = case_when(strand == "+" ~ "last", 
+#                                   strand == "-" ~ "first"), 
+#              color = case_when(strand == "+" ~ "blue", 
+#                                strand == "-" ~ "orange" 
+#                                
+#              ))
+#     
+#     p <- plotlyRV$plotGG +
+#       geom_segment_interactive(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
+#                                                                  xend=end,
+#                                                                  yend=(as.numeric(y)*(3)),
+#                                                                  tooltip = attributes),
+#                                arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
+#                                                  type = "closed", ends = as.character(annotationTable$arrowEnd)),
+#                                size=2, color=as.character(annotationTable$color))
+#     
+#     
+#     girafe(ggobj = p,  width_svg = ((input$dimensionGgiraph[1]/96) * 1.33) , # convert pixel to inch + 1.33 because ggiraph
+#            height_svg = (5.2 * 1.33) , 
+#            options = list(
+#              opts_sizing(rescale = FALSE) )
+#     )
+#   } else {
+#     NULL
+#   }
+# })
+
+
+################################################################################
+# Explore 
+################################################################################
+
+output$hover_info <- renderUI({
+  
+  emptyTemp = HTML(paste("<table><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
+                         paste(plotlyRV$p %>%
+                                 select(name) %>%
+                                 distinct(name) %>%
+                                 mutate(color = plotlyRV$colors, 
+                                        printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td></td><tr>")
+                                 ) %>% 
+                                 pull (printText), collapse = ""), 
+                         "</tbody></table>", collapse=""))
+  
+  if(!is.null(input$plot_hover)){
+    hover=input$plot_hover
     
-    annotationTable <- subset(rvAnnotation$annotation, type == input$typeSelector)
-    annotationTable$attributes = unlist(lapply(annotationTable$attributes, function(x){
-      texteinter = unlist(strsplit(unlist(strsplit(x, ";")), '='))
-      texte = texteinter[seq(2,length(texteinter), 2)]
-      names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
-      texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
-    }))
-    
-    
-    levelAnnot <- vector(mode = "list", length = 5)
-    names(levelAnnot) <- 0:4
-    annotationTable <- annotationTable %>% arrange(start)
-    for(i in 1:nrow(annotationTable)){
-      
-      if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[1]]])){
-        levelAnnot[[1]] = c(levelAnnot[[1]], i)
-      } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[2]]])) {
-        levelAnnot[[2]] = c(levelAnnot[[2]], i)
-      }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[3]]])) {
-        levelAnnot[[3]] = c(levelAnnot[[3]], i)
-      }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[4]]])) {
-        levelAnnot[[4]] = c(levelAnnot[[4]], i)
-      }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[5]]])) {
-        levelAnnot[[5]] = c(levelAnnot[[5]], i)
-      } else {
-        levelAnnot[[1]] = c(levelAnnot[[1]], i)
-      }
+    if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
+      HTML(paste("<table><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
+                 paste(plotlyRV$p %>%
+                         filter(as.numeric(x) == round(hover$x)) %>%
+                         mutate(color = plotlyRV$colors, 
+                                printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td>",round(as.numeric(y), 1),"</td><tr>")
+                         ) %>% 
+                         pull (printText), collapse = ""), 
+                 "</tbody></table>", collapse=""))
+    } else {
+      emptyTemp
     }
     
-    annotationTable$y = rep(names(levelAnnot), lengths(levelAnnot))
-    annotationTable = annotationTable %>%
-      mutate(arrowEnd = case_when(strand == "+" ~ "last", 
-                                  strand == "-" ~ "first"), 
-             color = case_when(strand == "+" ~ "blue", 
-                               strand == "-" ~ "orange" 
-                               
-             ))
-    write.table(annotationTable, "test.txt")
-    p <- plotlyRV$plotGG +
-      geom_segment_interactive(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
-                                                       xend=end,
-                                                       yend=(as.numeric(y)*(3)),
-                                                       tooltip = attributes),
-                               arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
-                                                 type = "closed", ends = as.character(annotationTable$arrowEnd)),
-                               size=2, color=as.character(annotationTable$color))
-    
-    
-    girafe(ggobj = p,  width_svg = ((input$dimensionGgiraph[1]/96) * 1.33) , # convert pixel to inch + 1.33 because ggiraph
-           height_svg = (5.2 * 1.33) , 
-           options = list(
-             opts_sizing(rescale = FALSE) )
-    )
   } else {
-    NULL
+    
+    emptyTemp
+  }
+})
+
+output$hover_info_annot <- renderUI({
+  if(!is.null(input$plot_hover) & !is.null(plotlyRV$annotationTable)){
+    hover=input$plot_hover
+    HTML(paste(plotlyRV$annotationTable %>%
+                 filter(as.numeric(plotlyRV$annotationTable$start) <= round(hover$x) & as.numeric(plotlyRV$annotationTable$end) >= round(hover$x)) %>%
+                 pull(attributes), collapse = "<br>"))
+  }
+})
+
+
+output$brush_info <- renderUI({
+  if(!is.null(input$plot_brush)){
+    brush=input$plot_brush
+    
+    HTML(paste("<table><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
+               paste(plotlyRV$p %>%
+                       filter(plotlyRV$p$x >= brush$xmin, 
+                              plotlyRV$p$x <= brush$xmax) %>% 
+                       group_by(name) %>%
+                       summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
+                       mutate(color = plotlyRV$colors, 
+                              printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td>",round(mean_size, 1),"</td><tr>")
+                       ) %>% 
+                       pull (printText), collapse = ""), 
+               "</tbody></table>", collapse=""))
+    
   }
 })
 
@@ -360,14 +492,9 @@ observeEvent(input$updateGrid, {
 # Generate plot - PIP profile
 ################################################################################
 
-observeEvent({ 
-  genomes$genomesNto1$alignments
-  rvAnnotation$annotation
-  input$updateGeneral
-  input$reversePlot
-} , {
+observeEvent(genomes$genomesNto1$alignments, {
+  
   if(!is.null(genomes$genomesNto1$alignments)) {
-    
     if(input$dataset == "rdata" | (input$dataset ==  "demo" & input$demoType == "rdata")){
       
       updateSliderInput(session, "xlimRange",
@@ -412,171 +539,184 @@ observeEvent({
       
       
     } else {
-      
-      #=========================================================================
-      # Variables
-      #=========================================================================
-      
-      reversePlot = input$reversePlot
-      plotlyRV$windowSize = input$windowSize
-      
-      refID = NULL
-      leftLimit = NULL
-      rightLimit = NULL
-      
-      colors = genomes$strainColors
-      
-      #===========================================================================
-      # Plot preparation
-      #===========================================================================
-      
-      alignments = genomes$genomesNto1$alignments
-      
-      p <- NULL
-      
-      ## Initialise variables
-      meanPIPs <- vector() ## Mean PIP per sequence
-      i <- 1 #
-      nbAlignments <- length(alignments)
-      
-      ## Color palette
-      if (is.null(colors)) {
-        colors <- rainbow(n = length(alignments))
-        names(colors) <- names(alignments)
-      }
-      
-      ggplotTable = NULL
-      seqColors = NULL
-      
-      ## Plot PIP profiles
-      i <- 1
-      for (i in 1:length(alignments)) {
-        if (reversePlot) {
-          j <- length(alignments) - i + 1
-        } else {
-          j <- i
-        }
-        
-        subject <- names(alignments)[j]
-        alignment <- alignments[[j]]
-        
-        ## Get the aligned reference and query sequences
-        refSeq <- unlist(strsplit(as.character(pattern(alignment)), split = ""))
-        subjectSeq <- unlist(strsplit(as.character(subject(alignment)), split = ""))
-        
-        # ## Only keep the positions corresponding to the reference sequence (no gap in ref)
-        plotlyRV$refPositions <- refSeq != "-"
-        
-        ## Compute identity per position
-        identityProfile <- refSeq[plotlyRV$refPositions] == subjectSeq[plotlyRV$refPositions]
-        
-        
-        ## Compute PIP profile
-        pipProfile <- 100 * stats::filter(identityProfile, filter = rep(1/plotlyRV$windowSize, plotlyRV$windowSize))
-        
-        ## Compute PIP limits
-        if (is.null(leftLimit)) {
-          pipStart <- 1
-        } else {
-          pipStart <- leftLimit
-        }
-        if (is.null(rightLimit)) {
-          pipEnd <- length(identityProfile)
-        } else {
-          pipEnd <- rightLimit
-        }
-        
-        ## Compute mean PIP over the specified limits (pipStart, pipEnd)
-        meanPIP <- round(digits = 3, 100 * sum(identityProfile[pipStart:pipEnd],na.rm = TRUE) / length(identityProfile))
-        meanPIPs <- c(meanPIPs, meanPIP)
-        
-        message("\t", i, "/", nbAlignments,
-                "\tpid = ", round(digits = 2, pid(alignment)),
-                "\t", subject,
-                "\tfrom ", pipStart,
-                "\tto ", pipEnd,
-                "\tmeanPIP = ", meanPIP
-        )
-        
-        ## Sequence color
-        if (is.null(colors[subject])) {
-          seqColor <- colors[j]
-        } else {
-          seqColor <- colors[subject]
-        }
-        
-        seqColors = c(seqColors, seqColor)
-        
-        ggplotTable = rbind.data.frame(
-          ggplotTable, 
-          cbind.data.frame(x = pipStart:pipEnd,
-                           y = pipProfile[pipStart:pipEnd],
-                           name = paste0(subject, " (", round(digits = 1, meanPIP), "%)"))
-        )
-      }
-      
-      #===========================================================================
-      # Reactive values
-      #===========================================================================
-      
-      plotlyRV$p = ggplotTable
-      plotlyRV$colors = setNames(seqColors, 
-                                 unique(plotlyRV$p$name))
-      rm(ggplotTable)
-      
-      plotlyRV$title_main = paste0("Full PIP profile - Ref: ", genomes$refGenomeName)
-      plotlyRV$title_x = "Position "
-      plotlyRV$title_y = paste0("PIP (", plotlyRV$windowSize," bp-averaged)")
-      plotlyRV$title_legende = 'Species'
-      
-      plotlyRV$xlim = c(0,length(plotlyRV$refPositions))
-      plotlyRV$ylim = c(0,100)
-
-      plotlyRV$colMinorX = input$colMinorX 
-      plotlyRV$sizeMinorX = input$sizeMinorX 
-      plotlyRV$colMajorX = input$colMajorX 
-      plotlyRV$sizeMajorX = input$sizeMajorX 
-      plotlyRV$colMinorY = input$colMinorY 
-      plotlyRV$sizeMinorY = input$sizeMinorY 
-      plotlyRV$colMajorY = input$colMajorY
-      plotlyRV$sizeMajorY = input$sizeMajorY
-      
-      if(length(plotlyRV$refPositions) < 5000) {
-        plotlyRV$spaceMajorX = 500
-        plotlyRV$spaceMinorX = 100
-      } else {
-        plotlyRV$spaceMajorX = 5000 
-        plotlyRV$spaceMinorX = 1000
-      }
-
-      plotlyRV$spaceMajorY = input$spaceMajorY 
-      plotlyRV$spaceMinorY = input$spaceMinorY
-      
-      #===========================================================================
-      # Update
-      #===========================================================================
-      updateSliderInput(session, "xlimRange",
-                        min = 0, max = length(plotlyRV$refPositions), 
-                        value = c(0, length(plotlyRV$refPositions))
-      )
-      
-      updateTextInput(session, "titleInput_main", value = "Full PIP profile")
-      updateTextInput(session, "titleInput_x", value = "Position")
-      updateTextInput(session, "titleInput_y", value = paste0("PIP (", plotlyRV$windowSize," bp-averaged)"))
-      updateTextInput(session, "titleInput_legende", value = 'Species')
-      
-      updateNumericInput(session, "spaceMajorX", value = plotlyRV$spaceMajorX)
-      updateNumericInput(session, "spaceMinorX", value = plotlyRV$spaceMinorX)
-      updateNumericInput(session, "spaceMajorY", value = plotlyRV$spaceMajorY)
-      updateNumericInput(session, "spaceMinorY", value = plotlyRV$spaceMinorY)
-      
-      updateSelectizeInput(session, "speciesColor_name", 
-                           choices =  setNames(names(plotlyRV$colors), 
-                                               names(plotlyRV$colors)),
-                           selected = names(plotlyRV$colors)[1])
+      createPIPprofile()
     }
   }
 })
+
+
+observeEvent({
+  input$updateGeneral
+  input$reversePlot
+}, {
+  if(!is.null(genomes$genomesNto1$alignments)) {
+    createPIPprofile()
+  }
+})
+
+createPIPprofile <- function(){
+  #=========================================================================
+  # Variables
+  #=========================================================================
+  
+  reversePlot = input$reversePlot
+  plotlyRV$windowSize = input$windowSize
+  
+  refID = NULL
+  leftLimit = NULL
+  rightLimit = NULL
+  
+  colors = genomes$strainColors
+  
+  #===========================================================================
+  # Plot preparation
+  #===========================================================================
+  
+  alignments = genomes$genomesNto1$alignments
+  
+  p <- NULL
+  
+  ## Initialise variables
+  meanPIPs <- vector() ## Mean PIP per sequence
+  i <- 1 #
+  nbAlignments <- length(alignments)
+  
+  ## Color palette
+  if (is.null(colors)) {
+    colors <- rainbow(n = length(alignments))
+    names(colors) <- names(alignments)
+  }
+  
+  ggplotTable = NULL
+  seqColors = NULL
+  
+  ## Plot PIP profiles
+  i <- 1
+  for (i in 1:length(alignments)) {
+    if (reversePlot) {
+      j <- length(alignments) - i + 1
+    } else {
+      j <- i
+    }
+    
+    subject <- names(alignments)[j]
+    alignment <- alignments[[j]]
+    
+    ## Get the aligned reference and query sequences
+    refSeq <- unlist(strsplit(as.character(pattern(alignment)), split = ""))
+    subjectSeq <- unlist(strsplit(as.character(subject(alignment)), split = ""))
+    
+    # ## Only keep the positions corresponding to the reference sequence (no gap in ref)
+    plotlyRV$refPositions <- refSeq != "-"
+    
+    ## Compute identity per position
+    identityProfile <- refSeq[plotlyRV$refPositions] == subjectSeq[plotlyRV$refPositions]
+    
+    
+    ## Compute PIP profile
+    pipProfile <- 100 * stats::filter(identityProfile, filter = rep(1/plotlyRV$windowSize, plotlyRV$windowSize))
+    
+    ## Compute PIP limits
+    if (is.null(leftLimit)) {
+      pipStart <- 1
+    } else {
+      pipStart <- leftLimit
+    }
+    if (is.null(rightLimit)) {
+      pipEnd <- length(identityProfile)
+    } else {
+      pipEnd <- rightLimit
+    }
+    
+    ## Compute mean PIP over the specified limits (pipStart, pipEnd)
+    meanPIP <- round(digits = 3, 100 * sum(identityProfile[pipStart:pipEnd],na.rm = TRUE) / length(identityProfile))
+    meanPIPs <- c(meanPIPs, meanPIP)
+    
+    message("\t", i, "/", nbAlignments,
+            "\tpid = ", round(digits = 2, pid(alignment)),
+            "\t", subject,
+            "\tfrom ", pipStart,
+            "\tto ", pipEnd,
+            "\tmeanPIP = ", meanPIP
+    )
+    
+    ## Sequence color
+    if (is.null(colors[subject])) {
+      seqColor <- colors[j]
+    } else {
+      seqColor <- colors[subject]
+    }
+    
+    seqColors = c(seqColors, seqColor)
+    
+    ggplotTable = rbind.data.frame(
+      ggplotTable, 
+      cbind.data.frame(x = pipStart:pipEnd,
+                       y = pipProfile[pipStart:pipEnd],
+                       name = paste0(subject, " (", round(digits = 1, meanPIP), "%)"))
+    )
+  }
+  
+  #===========================================================================
+  # Reactive values
+  #===========================================================================
+  
+  plotlyRV$p = ggplotTable
+  plotlyRV$colors = setNames(seqColors, 
+                             unique(plotlyRV$p$name))
+  rm(ggplotTable)
+  
+  plotlyRV$title_main = paste0("Full PIP profile - Ref: ", genomes$refGenomeName)
+  plotlyRV$title_x = "Position "
+  plotlyRV$title_y = paste0("PIP (", plotlyRV$windowSize," bp-averaged)")
+  plotlyRV$title_legende = 'Species'
+  
+  plotlyRV$xlim = c(0,length(plotlyRV$refPositions))
+  plotlyRV$ylim = c(0,100)
+  
+  plotlyRV$colMinorX = input$colMinorX 
+  plotlyRV$sizeMinorX = input$sizeMinorX 
+  plotlyRV$colMajorX = input$colMajorX 
+  plotlyRV$sizeMajorX = input$sizeMajorX 
+  plotlyRV$colMinorY = input$colMinorY 
+  plotlyRV$sizeMinorY = input$sizeMinorY 
+  plotlyRV$colMajorY = input$colMajorY
+  plotlyRV$sizeMajorY = input$sizeMajorY
+  
+  if(length(plotlyRV$refPositions) < 5000) {
+    plotlyRV$spaceMajorX = 500
+    plotlyRV$spaceMinorX = 100
+  } else {
+    plotlyRV$spaceMajorX = 5000 
+    plotlyRV$spaceMinorX = 1000
+  }
+  
+  plotlyRV$spaceMajorY = input$spaceMajorY 
+  plotlyRV$spaceMinorY = input$spaceMinorY
+  
+  #===========================================================================
+  # Update
+  #===========================================================================
+  updateSliderInput(session, "xlimRange",
+                    min = 0, max = length(plotlyRV$refPositions), 
+                    value = c(0, length(plotlyRV$refPositions))
+  )
+  
+  updateTextInput(session, "titleInput_main", value = "Full PIP profile")
+  updateTextInput(session, "titleInput_x", value = "Position")
+  updateTextInput(session, "titleInput_y", value = paste0("PIP (", plotlyRV$windowSize," bp-averaged)"))
+  updateTextInput(session, "titleInput_legende", value = 'Species')
+  
+  updateNumericInput(session, "spaceMajorX", value = plotlyRV$spaceMajorX)
+  updateNumericInput(session, "spaceMinorX", value = plotlyRV$spaceMinorX)
+  updateNumericInput(session, "spaceMajorY", value = plotlyRV$spaceMajorY)
+  updateNumericInput(session, "spaceMinorY", value = plotlyRV$spaceMinorY)
+  
+  updateSelectizeInput(session, "speciesColor_name", 
+                       choices =  setNames(names(plotlyRV$colors), 
+                                           names(plotlyRV$colors)),
+                       selected = names(plotlyRV$colors)[1])
+}
 
 ################################################################################
 # Download plot 

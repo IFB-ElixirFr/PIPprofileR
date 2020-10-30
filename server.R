@@ -159,6 +159,7 @@ shinyServer(function(input, output, session) {
             Nto1_list <- genomes$genomesNto1
             Nto1_list$plot <- plotlyRV
             save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
+            
             rm(Nto1_list)
 
             oldDir <- getwd()

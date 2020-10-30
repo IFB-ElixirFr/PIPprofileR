@@ -1,6 +1,25 @@
 graphic <- fluidPage(
   uiOutput("plotArea_title"),
   uiOutput("plotArea"), 
+
+  h2(tagList(shiny::icon("info-circle"), "Exploration")), 
+  fluidRow(
+    column(width = 4,
+           h3("Position values"),
+           helpText("Hover the plot to get the PIP values"),
+           uiOutput("hover_info")
+    ), 
+    column(width = 4,
+           h3("Annotation information"),
+           helpText("Hover over the plot to get the annotation information"),
+           uiOutput("hover_info_annot")
+    ), 
+    column(width = 4,
+           h3("Mean area"),
+           helpText("Select an area.  The average of the PIPs for each strain in the zone will be calculated."), 
+           uiOutput("brush_info")
+    )
+  ),
   
   div(id = "geneExplore", style="display : none;", 
       h2(tagList(shiny::icon("search"), "Feature exploration")), 
