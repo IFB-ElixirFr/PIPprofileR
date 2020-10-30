@@ -1,7 +1,7 @@
 home <- fluidPage(
   HTML('<div class="container">'), 
   img(src="img/logo.svg",style= "height:300px; display: block; margin-left: auto; margin-right: auto" ), 
-  h3("PIPprofileR is a tool to easily generate Profiles of Percent Identical Proteins from a fasta file (nucloetide or peptide sequences). 
+  h3("PIPprofileR is a tool to easily generate Profiles of Percent Identical Positions from a fasta file (nucloetide or peptide sequences). 
     With the help of an annotation file, it will be possible to simply explore the results."),
   
   fluidRow( style="display: flex; text-align:center;", 
