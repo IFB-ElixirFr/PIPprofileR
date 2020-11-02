@@ -12,24 +12,10 @@ firstup <- function(x) {
 ################################################################################
 
 output$plotArea <- renderUI(
-  if(input$dynamicPlot){
-    withLoader(plotlyOutput("plotPLOTLY", height = "500px"))
-  } else {
     withLoader(plotOutput("plotGGPLOT", height = "500px",
                           hover = hoverOpts(id ="plot_hover", delay=100),
                           click = clickOpts(id ="plot_click"),
                           brush = brushOpts(id ="plot_brush", delay=100)))
-  }
-  
-  # else if( is.null(rvAnnotation$annotation )) {
-  #   withLoader(plotOutput("plotGGPLOT", height = "500px",
-  #                         hover = hoverOpts(id ="plot_hover", delay=100),
-  #                         click = clickOpts(id ="plot_click"),
-  #                         brush = brushOpts(id ="plot_brush", delay=100)))
-  # } else {
-  #   withLoader(girafeOutput("plotGGPLOT_ggiraph", width = "100%", height = "500px"))
-  # }
-  
 )
 
 output$plotArea_title <- renderUI(
@@ -132,98 +118,9 @@ observe({
   }
 })
 
-output$plotPLOTLY <- renderPlotly({
-  
-  if(!is.null(genomes$genomesNto1$alignments) & input$dynamicPlot) {
-    
-    if(!is.null(rvAnnotation$annotation )){
-      p2 <- plot_ly() 
-      
-      inter <- subset(rvAnnotation$annotation, type == input$typeSelector)
-      
-      for(i in 1:nrow(inter)){
-        
-        position_inter = c(as.numeric(as.character(inter$start[i])),
-                           as.numeric(as.character(inter$end[i])))
-        
-        texteinter = unlist(strsplit(unlist(strsplit(inter$attributes[i], ";")), '='))
-        texte = texteinter[seq(2,length(texteinter), 2)]
-        names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
-        
-        texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
-        
-        if(inter$strand[i] == "+"){
-          
-          p2 <- add_trace(p2,
-                          x = position_inter,
-                          y = rep(0,2) ,
-                          type="scatter",
-                          mode = 'lines+markers',
-                          symbol = I(15),
-                          marker = list(
-                            color = '#a37800',
-                            size = 20,
-                            symbol = c('triangle-right', 'triangle-left')
-                          ),
-                          line = list(color = 'orange', width = 8),
-                          text = texte ,
-                          hoverinfo = 'text',
-                          showlegend = F
-                          
-          )
-        } else {
-          p2 <- add_trace(p2, type="scatter", 
-                          x = position_inter,
-                          y = rep(-1,2) ,
-                          type="scatter",
-                          mode = 'lines+markers',
-                          symbol = I(15),
-                          marker = list(
-                            color = '#8800a3',
-                            size = 20,  
-                            symbol = c('triangle-right', 'triangle-left')
-                          ),
-                          line = list(color = 'purple', width = 8),
-                          text = texte ,
-                          hoverinfo = 'text',
-                          showlegend = F
-          )
-        }
-        
-        plotlyRV$p2 <- p2
-      } 
-      subplot(ggplotly(plotlyRV$plotGG)  %>%
-                layout(hovermode = "x unified")
-              , 
-              plotlyRV$p2 %>%
-                layout(yaxis = list(title = 'Annotation', 
-                                    fixedrange=T,
-                                    range = c(-1.5,1.5),
-                                    zeroline = F,
-                                    showline = F,
-                                    showticklabels = F,
-                                    showgrid = F),
-                       xaxis = list( range = plotlyRV$xlim,
-                                     title = "Position",
-                                     zeroline = T,
-                                     showline = T,
-                                     showticklabels = T,
-                                     showgrid = F)) , 
-              shareX=TRUE,
-              nrows = 2, 
-              heights = c(0.8, 0.2))
-    } else {
-      ggplotly(plotlyRV$plotGG )  %>%
-        layout(hovermode = "x unified")
-    }
-  } else {
-    NULL
-  }
-  
-})
 
 output$plotGGPLOT <- renderPlot({
-  if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot) {
+  if(!is.null(genomes$genomesNto1$alignments)) {
 
     if(is.null(rvAnnotation$annotation)){
       plotlyRV$plotGG
@@ -284,76 +181,13 @@ output$plotGGPLOT <- renderPlot({
   }
 })
 
-
-# output$plotGGPLOT_ggiraph <- renderGirafe({
-#   if(!is.null(genomes$genomesNto1$alignments) & !input$dynamicPlot & !is.null(rvAnnotation$annotation) & !is.null(input$typeSelector)) {
-#     
-#     annotationTable <- subset(rvAnnotation$annotation, type == input$typeSelector)
-#     annotationTable$attributes = unlist(lapply(annotationTable$attributes, function(x){
-#       texteinter = unlist(strsplit(unlist(strsplit(x, ";")), '='))
-#       texte = texteinter[seq(2,length(texteinter), 2)]
-#       names(texte) = firstup(sub("_", " ", texteinter[seq(1,length(texteinter), 2)]))
-#       texte = paste(paste("<b>",names(texte), "</b>:",texte), collapse = "<br>")
-#     }))
-#     
-#     
-#     levelAnnot <- vector(mode = "list", length = 5)
-#     names(levelAnnot) <- 0:4
-#     annotationTable <- annotationTable %>% arrange(start)
-#     for(i in 1:nrow(annotationTable)){
-#       
-#       if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[1]]])){
-#         levelAnnot[[1]] = c(levelAnnot[[1]], i)
-#       } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[2]]])) {
-#         levelAnnot[[2]] = c(levelAnnot[[2]], i)
-#       }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[3]]])) {
-#         levelAnnot[[3]] = c(levelAnnot[[3]], i)
-#       }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[4]]])) {
-#         levelAnnot[[4]] = c(levelAnnot[[4]], i)
-#       }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[5]]])) {
-#         levelAnnot[[5]] = c(levelAnnot[[5]], i)
-#       } else {
-#         levelAnnot[[1]] = c(levelAnnot[[1]], i)
-#       }
-#     }
-#     
-#     annotationTable$y = rep(names(levelAnnot), lengths(levelAnnot))
-#     annotationTable = annotationTable %>%
-#       mutate(arrowEnd = case_when(strand == "+" ~ "last", 
-#                                   strand == "-" ~ "first"), 
-#              color = case_when(strand == "+" ~ "blue", 
-#                                strand == "-" ~ "orange" 
-#                                
-#              ))
-#     
-#     p <- plotlyRV$plotGG +
-#       geom_segment_interactive(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
-#                                                                  xend=end,
-#                                                                  yend=(as.numeric(y)*(3)),
-#                                                                  tooltip = attributes),
-#                                arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
-#                                                  type = "closed", ends = as.character(annotationTable$arrowEnd)),
-#                                size=2, color=as.character(annotationTable$color))
-#     
-#     
-#     girafe(ggobj = p,  width_svg = ((input$dimensionGgiraph[1]/96) * 1.33) , # convert pixel to inch + 1.33 because ggiraph
-#            height_svg = (5.2 * 1.33) , 
-#            options = list(
-#              opts_sizing(rescale = FALSE) )
-#     )
-#   } else {
-#     NULL
-#   }
-# })
-
-
 ################################################################################
 # Explore 
 ################################################################################
 
 output$hover_info <- renderUI({
   
-  emptyTemp = HTML(paste("<table><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
+  emptyTemp = HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
                          paste(plotlyRV$p %>%
                                  select(name) %>%
                                  distinct(name) %>%
@@ -367,11 +201,11 @@ output$hover_info <- renderUI({
     hover=input$plot_hover
     
     if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
-      HTML(paste("<table><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
+      HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>PIP</th></tr></thead><tbody>", 
                  paste(plotlyRV$p %>%
                          filter(as.numeric(x) == round(hover$x)) %>%
                          mutate(color = plotlyRV$colors, 
-                                printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td>",round(as.numeric(y), 1),"</td><tr>")
+                                printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
                          ) %>% 
                          pull (printText), collapse = ""), 
                  "</tbody></table>", collapse=""))
@@ -398,19 +232,27 @@ output$hover_info_annot <- renderUI({
 output$brush_info <- renderUI({
   if(!is.null(input$plot_brush)){
     brush=input$plot_brush
+    if(nrow(plotlyRV$p %>%
+       filter(plotlyRV$p$x >= brush$xmin, 
+              plotlyRV$p$x <= brush$xmax) %>% 
+       group_by(name) ) != 0){
+      HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>", 
+                 paste(plotlyRV$p %>%
+                         filter(plotlyRV$p$x >= brush$xmin, 
+                                plotlyRV$p$x <= brush$xmax) %>% 
+                         group_by(name) %>%
+                         summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
+                         mutate(color = plotlyRV$colors[name], 
+                                printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(mean_size, 1),"</td><tr>")
+                         ) %>% 
+                         pull (printText), collapse = ""), 
+                 "</tbody></table>", collapse=""))
+    } else {
+      NULL
+    }
     
-    HTML(paste("<table><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
-               paste(plotlyRV$p %>%
-                       filter(plotlyRV$p$x >= brush$xmin, 
-                              plotlyRV$p$x <= brush$xmax) %>% 
-                       group_by(name) %>%
-                       summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
-                       mutate(color = plotlyRV$colors, 
-                              printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td>",round(mean_size, 1),"</td><tr>")
-                       ) %>% 
-                       pull (printText), collapse = ""), 
-               "</tbody></table>", collapse=""))
-    
+  } else {
+    NULL
   }
 })
 

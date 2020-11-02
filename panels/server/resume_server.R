@@ -16,8 +16,8 @@ output$resumeQuery <-  renderDataTable({
                                "*","A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y"))
         
         vectInter[names(statInter$Compo)] = statInter$Compo
-        vectInter[names(unlist(statInter$Prop))] = unlist(statInter$Prop)
-        vectInter["Pi"] = statInter$Pi
+        vectInter[names(unlist(statInter$Prop))] = round(unlist(statInter$Prop), 2)
+        vectInter["Pi"] = round(statInter$Pi, 2)
         vectInter = c(Size = nchar(s), vectInter)
       }))
       
@@ -36,6 +36,19 @@ output$refName_ui <- renderUI(
 
 output$refSize_ui <- renderUI(
   HTML(paste0("<p><b>Size </b>: ",nchar(genomes$genomesNto1$reference),"</p>"))
+)
+
+output$refType_ui <- renderUI(
+  if(!is.null(genomes$genomesNto1$seqType)){
+    if(genomes$genomesNto1$seqType == "DNA"){
+      HTML("<p><b>Sequence Type </b>:  Nucleic acid sequence</p>")
+    } else {
+      HTML("<p><b>Sequence Type </b>: Protein sequence</p>")
+    }
+  } else {
+    HTML("<p><b>Sequence Type </b>: </p>")
+  }
+
 )
 
 

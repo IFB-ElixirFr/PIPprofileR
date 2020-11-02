@@ -26,9 +26,6 @@ suppressMessages(suppressWarnings(library(shinycssloaders)))
 suppressMessages(suppressWarnings(library(shinyhelper)))
 suppressMessages(suppressWarnings(library(colourpicker)))
 suppressMessages(suppressWarnings(library(shinycustomloader)))
-suppressMessages(suppressWarnings(library(DECIPHER)))
-suppressMessages(suppressWarnings(library(ggiraph)))
-suppressMessages(suppressWarnings(library(tibble)))
 
 #===============================================================================
 # Read FASTA files 
@@ -45,6 +42,8 @@ suppressMessages(suppressWarnings(library(ape)))
 #===============================================================================
 suppressMessages(suppressWarnings(library(DT)))
 suppressMessages(suppressWarnings(library(plotly)))
+suppressMessages(suppressWarnings(library(ggiraph)))
+suppressMessages(suppressWarnings(library(DECIPHER)))
 
 #===============================================================================
 # Data treatment 
@@ -52,6 +51,7 @@ suppressMessages(suppressWarnings(library(plotly)))
 suppressMessages(suppressWarnings(library(dplyr)))
 suppressMessages(suppressWarnings(library(reshape2)))
 suppressMessages(suppressWarnings(library(knitr)))
+suppressMessages(suppressWarnings(library(tibble)))
 
 #===============================================================================
 # Write report

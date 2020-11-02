@@ -138,10 +138,16 @@ shinyServer(function(input, output, session) {
         
         message("queryGenomes :", length(queryGenomes))
         
+        if(!(input$dataset == "input" )){
+            genomes$genomesNto1$seqType = input$pairwiseType
+        }
+
         genomes$genomesNto1 <- alignNtoOne(
             refSequence = refGenome, 
             querySequences = queryGenomes,
-            outfile = OF, seqType = input$seqType)
+            type = genomes$genomesNto1$seqType ,
+            outfile = OF, 
+            seqType = genomes$genomesNto1$seqType)
         
         updateTabItems(session, "tabs", selected = "graphic")
     })
@@ -159,6 +165,15 @@ shinyServer(function(input, output, session) {
             Nto1_list <- genomes$genomesNto1
             Nto1_list$plot <- plotlyRV
             save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
+            
+            if(!is.null(rvAnnotation$annotation)) {
+                if(!is.null(input$fileAnnot)){
+                    message(paste0(tmpFolder, "/", input$fileAnnot$name))
+                    file.copy(input$fileAnnot$datapath, paste0(tmpFolder, "/", input$fileAnnot$name), overwrite = TRUE ) 
+                } else {
+                    file.copy("dataExample/GCF_009858895.2_ASM985889v3_genomic.gff", tmpFolder, overwrite = TRUE ) 
+                }  
+            }
             
             rm(Nto1_list)
 

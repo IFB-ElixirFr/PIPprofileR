@@ -17,7 +17,18 @@ sequenceFilters <- fluidPage(
     ), 
     
     column(3,
-           h3("3- Select a windows size"), 
+           h3("3- Pairwise Alignment type"), 
+           helpText("A help text message - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. "), 
+           selectInput("pairwiseType", label = NULL, 
+                       choices = c("global", "local", "overlap", "global-local","local-global"),
+                       selected = "global-local", width = '100%'),
+           tags$ul(tags$li(tags$b("Global"),  ": align whole strings with end gap penalties ;"), 
+                   tags$li(tags$b("Local"),  ": align string fragments ;"), 
+                   tags$li(tags$b("Overlap"),  ": align whole strings without end gap penalties ;"), 
+                   tags$li(tags$b("Global-Local"),  ": align whole strings in pattern with consecutive subsequence of subject ;"), 
+                   tags$li(tags$b("Local-Global"),  ": align consecutive subsequence of pattern with whole strings in subject.")), 
+
+           h3("4- Select a windows size"), 
            helpText("A help text message - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. "), 
            numericInput("windowSize_param", label = NULL, value = 500, step = 50)
     )

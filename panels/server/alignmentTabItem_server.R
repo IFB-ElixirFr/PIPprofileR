@@ -29,7 +29,7 @@ output$resultNto1 <-  renderDataTable({
     }
     
     genomes$genomesNto1$stats %>%  arrange(desc(score))  %>% mutate(rn = rownames(genomes$genomesNto1$stats), 
-                                                                    Explore = paste0("<a href='",paste0(tmpFolderWithoutWWW, "/BrowseSeqs/BrowseSeqs_",rn,".html"),"' target='_blank'>Go to browser !</a>")) %>%
+                                                                    Explore = paste0("<a href='",paste0(tmpFolderWithoutWWW, "/BrowseSeqs/BrowseSeqs_",rn,".html"),"' target='_blank'>View alignment!</a>")) %>%
       column_to_rownames('rn')
   } else {
     NULL

@@ -1,23 +1,31 @@
 graphic <- fluidPage(
   uiOutput("plotArea_title"),
   uiOutput("plotArea"), 
-
-  h2(tagList(shiny::icon("info-circle"), "Exploration")), 
+  
+  
   fluidRow(
-    column(width = 4,
-           h3("Position values"),
-           helpText("Hover the plot to get the PIP values"),
-           uiOutput("hover_info")
+    
+    column(6, 
+           fluidRow(
+             h2(tagList(shiny::icon("info-circle"), "Exploration PIP")), 
+             column(width = 6,
+                    h3("Position values"),
+                    helpText("Hover the plot to get the PIP values"),
+                    uiOutput("hover_info")
+             ), 
+             column(width = 6,
+                    h3("Mean area"),
+                    helpText("Select an area.  The average of the PIPs for each strain in the zone will be calculated."), 
+                    uiOutput("brush_info")
+                    
+             )
+           )
+           
     ), 
-    column(width = 4,
-           h3("Annotation information"),
+    column(6, 
+           h2(tagList(shiny::icon("pen"), "Annotation")), 
            helpText("Hover over the plot to get the annotation information"),
            uiOutput("hover_info_annot")
-    ), 
-    column(width = 4,
-           h3("Mean area"),
-           helpText("Select an area.  The average of the PIPs for each strain in the zone will be calculated."), 
-           uiOutput("brush_info")
     )
   ),
   
@@ -49,10 +57,6 @@ graphic <- fluidPage(
                            h4("Closest sequence on top"),
                            switchInput(inputId = "reversePlot",NULL,  
                                        value = TRUE,
-                                       size = "mini"),
-                           h4("Dynamic plot "),
-                           switchInput(inputId = "dynamicPlot",NULL,  
-                                       value = FALSE,
                                        size = "mini"),
                            h4("Size of the sliding window"),
                            numericInput("windowSize", label = NULL, value = 500, step = 50), 
@@ -96,8 +100,8 @@ graphic <- fluidPage(
                            colourInput("colMinorX", "X minor", "#DDDDDD"), 
                            colourInput("colMajorY", "Y major", "#888888"), 
                            colourInput("colMinorY", "Y minor", "#DDDDDD")
-                           ),
-
+                    ),
+                    
                     column(4, h4("Grid size"),
                            numericInput("sizeMajorX", "X major", value = 0.5, min = 0, max = 5, step = 0.5, width = '100%'),
                            numericInput("sizeMinorX", "X minor", value = 0.5, min = 0, max = 5, step = 0.5, width = '100%'), 
