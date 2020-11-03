@@ -568,9 +568,10 @@ output$downloadPlot <- downloadHandler(
   filename = function(){paste0("FullPIP",'.', input$ggsave_format)},
   content = function(file){
     ggsave(file, plot=plotlyRV$plotGG, 
-           width = input$ggsave_width,
-           height = input$ggsave_height,
-           units = input$ggsave_unit,  
-           dpi = input$ggsave_dpi)
+           device = , as.character(input$ggsave_format), 
+           width = as.numeric(input$ggsave_width),
+           height = as.numeric(input$ggsave_height),
+           units = as.character(input$ggsave_unit),  
+           dpi = as.numeric(input$ggsave_dpi))
   }
 )

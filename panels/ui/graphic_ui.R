@@ -122,9 +122,9 @@ graphic <- fluidPage(
          ), 
          tabPanel("Save", 
                   fluidRow(
-                    column(4,numericInput("ggsave_width", label = "Width", min = 1, value = 29, width = '100%' )),
-                    column(4,numericInput("ggsave_height", label = "Height", min = 1, value = 21, width = '100%' )),
-                    column(4,selectInput("ggsave_unit", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm", width = '100%'))),
+                    column(4,numericInput("ggsave_width", label = "Width", min = 1, value = 20, width = '100%' )),
+                    column(4,numericInput("ggsave_height", label = "Height", min = 1, value = 5, width = '100%' )),
+                    column(4,selectInput("ggsave_unit", label = "Unit", choices = c("in", "cm", "mm"),selected = "in", width = '100%'))),
                   
                   fluidRow(style="display: flex; align-items: center;",
                            column(4,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300, width = '100%' )),
