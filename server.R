@@ -138,17 +138,19 @@ shinyServer(function(input, output, session) {
         
         message("queryGenomes :", length(queryGenomes))
         
-        if(!(input$dataset == "input" )){
-            genomes$genomesNto1$seqType = input$pairwiseType
+        if(input$dataset == "input"){
+            genomes$seqType =  input$seqType
         }
-
+        
         genomes$genomesNto1 <- alignNtoOne(
             refSequence = refGenome, 
             querySequences = queryGenomes,
-            type = genomes$genomesNto1$seqType ,
+            type = input$pairwiseType ,
             outfile = OF, 
-            seqType = genomes$genomesNto1$seqType)
+            seqType = genomes$seqType)
         
+        genomes$genomesNto1$pairwiseType = input$pairwiseType
+
         updateTabItems(session, "tabs", selected = "graphic")
     })
     
@@ -177,6 +179,16 @@ shinyServer(function(input, output, session) {
             
             rm(Nto1_list)
 
+            params <- list(si = si,
+                           genomes = genomes,
+                           plot= plotlyRV$plotGG,
+                           windows = plotlyRV$windowSize)
+
+            rmarkdown::render("report.Rmd", output_file = file.path(tmpFolder,'report.html'),
+                              params = params,
+                              envir = new.env(parent = globalenv())
+            )            
+            
             oldDir <- getwd()
             setwd(tmpFolder)
             fs <- list.files()

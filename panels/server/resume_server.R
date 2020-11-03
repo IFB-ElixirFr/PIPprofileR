@@ -1,7 +1,7 @@
 output$resumeQuery <-  renderDataTable({
   if(!is.null(genomes$genomesNto1)){
-    if(genomes$genomesNto1$seqType == "DNA"){
-      do.call("rbind", lapply(genomes$genomesNto1$sequences, function(s){
+    if(genomes$seqType == "DNA"){
+      genomes$SummarySequence  = do.call("rbind", lapply(genomes$genomesNto1$sequences, function(s){
         c(Size = nchar(s), (table(unlist(strsplit(as.character(s),"")))/nchar(s)) * 100)
       }))
       
@@ -22,8 +22,11 @@ output$resumeQuery <-  renderDataTable({
       }))
       
       detach(package:seqinr)
-      resInter
+      
+      genomes$SummarySequence = resInter
+
     }
+    genomes$SummarySequence 
   } else {
     NULL
   }
@@ -39,8 +42,9 @@ output$refSize_ui <- renderUI(
 )
 
 output$refType_ui <- renderUI(
-  if(!is.null(genomes$genomesNto1$seqType)){
-    if(genomes$genomesNto1$seqType == "DNA"){
+  if(!is.null(genomes$seqType)){
+    message(genomes$seqType)
+    if(genomes$seqType == "DNA"){
       HTML("<p><b>Sequence Type </b>:  Nucleic acid sequence</p>")
     } else {
       HTML("<p><b>Sequence Type </b>: Protein sequence</p>")

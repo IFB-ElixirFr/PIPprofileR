@@ -3,6 +3,7 @@ alignmentTabItem <- fluidPage(
   h2("Reference"), 
   uiOutput("refNameAlignemnt_ui"), 
   uiOutput("refSizeAlignemnt_ui"),
+  uiOutput("refTypeAlignemnt_ui"),
   h2("Table"), 
   withLoader(dataTableOutput(outputId = "resultNto1")), 
   h2("Distribution"), 

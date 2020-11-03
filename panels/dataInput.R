@@ -176,13 +176,13 @@ observeEvent(input$okData, {
           if(input$demo == "genome_CoV-2"){
             genomes$Sequences <- readDNAStringSet(filepath = "dataExample/genomes_around-CoV-2.fasta", 
                                                   format = "fasta")
-            updateRadioButtons(session, "seqType",selected = "DNA")
-            genomes$genomesNto1$seqType = "DNA"
+            updateRadioButtons(session, "seqType", selected = "DNA")
+            genomes$seqType = "DNA"
           } else if(input$demo == "spike_CoV-2" ) {
             genomes$Sequences <- readAAStringSet(filepath = "dataExample/spike_proteins_around-CoV-2.fasta", 
                                                  format = "fasta")
             updateRadioButtons(session, "seqType",selected = "AA")
-            genomes$genomesNto1$seqType = "AA"
+            genomes$seqType = "AA"
           }
           
           genomes$oldNames <- as.data.frame(genomes$Sequences@ranges)$names
@@ -209,6 +209,7 @@ observeEvent(input$okData, {
           }
           
           genomes$genomesNto1 <- Nto1_list
+          genomes$seqType = genomes$genomesNto1$seqType
           
           plotlyRV$p = Nto1_list$plot$p
           plotlyRV$plotGG = Nto1_list$plot$plotGG

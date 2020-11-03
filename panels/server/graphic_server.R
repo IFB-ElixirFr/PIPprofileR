@@ -166,7 +166,7 @@ output$plotGGPLOT <- renderPlot({
       
       plotlyRV$annotationTable = annotationTable
       
-      plotlyRV$plotGG +
+      plotlyRV$plotGG = plotlyRV$plotGG +
       geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
                                                      xend=end,
                                                      yend=(as.numeric(y)*(3)),
@@ -175,6 +175,7 @@ output$plotGGPLOT <- renderPlot({
                                      type = "closed", ends = as.character(annotationTable$arrowEnd)),
                    size=2, color=as.character(annotationTable$color))
       
+      plotlyRV$plotGG
     }
   } else {
     NULL

@@ -10,6 +10,9 @@ output$refSizeAlignemnt_ui <- renderUI(
   HTML(paste0("<p><b>Size </b>: ",nchar(genomes$genomesNto1$reference),"</p>"))
 )
 
+output$refTypeAlignemnt_ui <- renderUI(
+  HTML(paste0("<p><b>Type of alignment </b>: ",genomes$genomesNto1$pairwiseType,"</p>"))
+)
 
 ################################################################################
 # Table
@@ -18,8 +21,9 @@ output$refSizeAlignemnt_ui <- renderUI(
 output$resultNto1 <-  renderDataTable({
   if(!is.null(genomes$genomesNto1)){
     for(i in 1:length(genomes$genomesNto1$alignments)){
-      if(genomes$genomesNto1$seqType == "DNA"){
+      if(genomes$seqType == "DNA"){
         seq <- c(aligned(pattern(genomes$genomesNto1$alignments[[i]])), aligned(subject(genomes$genomesNto1$alignments[[i]]))) 
+
       } else {
         seq <- c(AAStringSet(pattern(genomes$genomesNto1$alignments[[i]])), AAStringSet(subject(genomes$genomesNto1$alignments[[i]]))) 
       }
