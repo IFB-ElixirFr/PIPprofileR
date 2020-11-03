@@ -54,10 +54,6 @@ graphic <- fluidPage(
          tabPanel("General",
                   fluidRow(
                     column(6,
-                           h4("Closest sequence on top"),
-                           switchInput(inputId = "reversePlot",NULL,  
-                                       value = TRUE,
-                                       size = "mini"),
                            h4("Size of the sliding window"),
                            numericInput("windowSize", label = NULL, value = 500, step = 50), 
                            actionButton("updateGeneral", label = "Update", icon = icon("sync-alt"))

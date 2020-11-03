@@ -107,6 +107,21 @@ observeEvent(input$multiQuery, {
 })
 
 ################################################################################
+# 3- Pairwise Alignment type"
+################################################################################
+
+output$helpPairwiseType <- renderText({ 
+  switch (input$pairwiseType,
+         "global" = "Align whole strings with end gap penalties", 
+         "local" = "Align string fragments", 
+         "overlap" = "Align whole strings without end gap penalties", 
+         "global-local" = "Align whole strings in pattern with consecutive subsequence of subject",
+         "local-global" = "align consecutive subsequence of pattern with whole strings in subject"
+  )  
+})
+
+
+################################################################################
 # Summary
 ################################################################################
 

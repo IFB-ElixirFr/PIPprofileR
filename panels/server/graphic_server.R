@@ -114,7 +114,7 @@ observe({
                           breaks = seq(0, 100, plotlyRV$spaceMajorY),
                           minor_breaks = seq(0, 100, plotlyRV$spaceMinorY)) + 
       labs(color=plotlyRV$title_legende) +
-      guides(color = guide_legend(override.aes = list(size = 2) ) )
+      guides(color = guide_legend(override.aes = list(size = 2), reverse = T))
   }
 })
 
@@ -186,12 +186,12 @@ output$plotGGPLOT <- renderPlot({
 ################################################################################
 
 output$hover_info <- renderUI({
-  
   emptyTemp = HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>", 
                          paste(plotlyRV$p %>%
                                  select(name) %>%
                                  distinct(name) %>%
-                                 mutate(color = plotlyRV$colors, 
+                                 arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+                                 mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))], 
                                         printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td></td><tr>")
                                  ) %>% 
                                  pull (printText), collapse = ""), 
@@ -204,7 +204,8 @@ output$hover_info <- renderUI({
       HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>PIP</th></tr></thead><tbody>", 
                  paste(plotlyRV$p %>%
                          filter(as.numeric(x) == round(hover$x)) %>%
-                         mutate(color = plotlyRV$colors, 
+                         arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+                         mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))], 
                                 printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
                          ) %>% 
                          pull (printText), collapse = ""), 
@@ -389,7 +390,6 @@ observeEvent(genomes$genomesNto1$alignments, {
 
 observeEvent({
   input$updateGeneral
-  input$reversePlot
 }, {
   if(!is.null(genomes$genomesNto1$alignments)) {
     createPIPprofile()
@@ -401,7 +401,6 @@ createPIPprofile <- function(){
   # Variables
   #=========================================================================
   
-  reversePlot = input$reversePlot
   plotlyRV$windowSize = input$windowSize
   
   refID = NULL
@@ -434,13 +433,7 @@ createPIPprofile <- function(){
   
   ## Plot PIP profiles
   i <- 1
-  for (i in 1:length(alignments)) {
-    if (reversePlot) {
-      j <- length(alignments) - i + 1
-    } else {
-      j <- i
-    }
-    
+  for (j in length(alignments):1) {
     subject <- names(alignments)[j]
     alignment <- alignments[[j]]
     
@@ -472,7 +465,8 @@ createPIPprofile <- function(){
     
     ## Compute mean PIP over the specified limits (pipStart, pipEnd)
     meanPIP <- round(digits = 3, 100 * sum(identityProfile[pipStart:pipEnd],na.rm = TRUE) / length(identityProfile))
-    meanPIPs <- c(meanPIPs, meanPIP)
+    meanPIPs <- c(meanPIPs, setNames(meanPIP,paste0(subject, " (", round(digits = 1, meanPIP), "%)")))
+    
     
     message("\t", i, "/", nbAlignments,
             "\tpid = ", round(digits = 2, pid(alignment)),
@@ -498,6 +492,8 @@ createPIPprofile <- function(){
                        name = paste0(subject, " (", round(digits = 1, meanPIP), "%)"))
     )
   }
+  
+  ggplotTable$name = factor(ggplotTable$name, names(meanPIPs)[order(meanPIPs)])
   
   #===========================================================================
   # Reactive values
