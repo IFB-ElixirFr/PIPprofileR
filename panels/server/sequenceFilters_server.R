@@ -16,14 +16,28 @@ observeEvent(input$refPattern, {
       selected = genomes$queryGenomeNamesAll
     )
     
+    
+    # Proposal of a window size according to the size of the sequences 
+    # 
+    # Purpose: a function that returns ~150 when the sequences are 3kb, and ~600 when they are 30kb. 
+    # Proposal : a linear function. 
+    # With w, the width of the window and L, the length of the sequences :
+    #   
+    #   w = a * L + b
+    # the slope a = (600 - 150) / (30000 - 3000) = 1 / 60
+    # the intercept b = 150 - a * 3000 = 150 - 50 = 100
+    # w = 1/60 * L + 100
+    
+    calculatedWindowSize = nchar(genomes$Sequences[[genomes$refGenomeName]]) / 60 + 100
+    
     updateNumericInput(session,
                        "windowSize_param", 
-                       value = round(nchar(genomes$Sequences[[genomes$refGenomeName]])/50)
+                       value = round(calculatedWindowSize)
     )
     
     updateNumericInput(session,
                        "windowSize", 
-                       value = round(nchar(genomes$Sequences[[genomes$refGenomeName]])/50)
+                       value = round(calculatedWindowSize)
     )
   }
 })
