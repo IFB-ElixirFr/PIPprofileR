@@ -43,7 +43,7 @@ shinyServer(function(input, output, session) {
     #===========================================================================
     
     si <- sessionInfo()
-
+    
     observe_helpers(session, help_dir = "helpfiles/")
     
     #===========================================================================
@@ -114,7 +114,7 @@ shinyServer(function(input, output, session) {
                         "Pi" = "Pig",
                         "Cv" = "Civet")
     
-
+    
     
     #===========================================================================
     # Run analysis
@@ -150,7 +150,7 @@ shinyServer(function(input, output, session) {
             seqType = genomes$seqType)
         
         genomes$genomesNto1$pairwiseType = input$pairwiseType
-
+        
         updateTabItems(session, "tabs", selected = "graphic")
     })
     
@@ -161,45 +161,58 @@ shinyServer(function(input, output, session) {
     output$downloadData <- downloadHandler(
         filename = paste0(nameTmpFolder, ".zip"),
         content = function(fname) {
-            #===================================================================
-            # Data preparation 
-            #===================================================================
-            Nto1_list <- genomes$genomesNto1
-            Nto1_list$plot <- plotlyRV
-            save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
-            
-            if(!is.null(rvAnnotation$annotation)) {
-                if(!is.null(input$fileAnnot)){
-                    message(paste0(tmpFolder, "/", input$fileAnnot$name))
-                    file.copy(input$fileAnnot$datapath, paste0(tmpFolder, "/", input$fileAnnot$name), overwrite = TRUE ) 
+            withProgress(message = 'Zip folder preparation', value = 0, {
+                step = 4
+                #===================================================================
+                # Data preparation 
+                #===================================================================
+                Nto1_list <- genomes$genomesNto1
+                Nto1_list$plot <- plotlyRV
+                
+                incProgress(1/step ,  detail  = "Save Rdata")
+                save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
+                
+                incProgress(1/step ,  detail  = "Copy annotation (if available)")
+                if(!is.null(rvAnnotation$annotation)) {
+                    if(!is.null(input$fileAnnot)){
+                        message(paste0(tmpFolder, "/", input$fileAnnot$name))
+                        file.copy(input$fileAnnot$datapath, paste0(tmpFolder, "/", input$fileAnnot$name), overwrite = TRUE ) 
+                    } else {
+                        file.copy("dataExample/GCF_009858895.2_ASM985889v3_genomic.gff", tmpFolder, overwrite = TRUE ) 
+                    }  
+                }
+                
+                rm(Nto1_list)
+                
+                incProgress(1/step ,  detail  = "Write report")
+                params <- list(si = si,
+                               genomes = genomes,
+                               plot= plotlyRV$plotGG,
+                               windows = plotlyRV$windowSize)
+                
+                if(!is.null(plotlyRV$annotationTable)) {
+                    params$annotationTable = plotlyRV$annotationTable
                 } else {
-                    file.copy("dataExample/GCF_009858895.2_ASM985889v3_genomic.gff", tmpFolder, overwrite = TRUE ) 
-                }  
-            }
-            
-            rm(Nto1_list)
-
-            params <- list(si = si,
-                           genomes = genomes,
-                           plot= plotlyRV$plotGG,
-                           windows = plotlyRV$windowSize)
-
-            rmarkdown::render("report.Rmd", output_file = file.path(tmpFolder,'report.html'),
-                              params = params,
-                              envir = new.env(parent = globalenv())
-            )            
-            
-            oldDir <- getwd()
-            setwd(tmpFolder)
-            fs <- list.files()
-            system(paste0("zip ",fname," " , paste0(fs , collapse = " ")))
-
-            setwd(oldDir)
-
+                    params$annotationTable = NA
+                }
+                
+                rmarkdown::render("report.Rmd", output_file = file.path(tmpFolder,'report.html'),
+                                  params = params,
+                                  envir = new.env(parent = globalenv())
+                )            
+                
+                incProgress(1/step ,  detail  = "Zip")
+                oldDir <- getwd()
+                setwd(tmpFolder)
+                fs <- list.files()
+                system(paste0("zip ",fname," " , paste0(fs , collapse = " ")))
+                
+                setwd(oldDir)
+            })
         },
         contentType = "application/zip"
     )
-
+    
     #===========================================================================
     # Clean temp
     #===========================================================================
@@ -207,5 +220,5 @@ shinyServer(function(input, output, session) {
     session$onSessionEnded(function(userID = users_data$USERS) {
         unlink(tmpFolder, recursive = T)
     })
-
+    
 })

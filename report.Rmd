@@ -10,6 +10,7 @@ params:
   genomes : NA
   plot : NA
   windows : NA
+  annotationTable: NA
 ---
 
 # Summary
@@ -32,7 +33,20 @@ params:
 
 
 ```{r  echo = F, warning = FALSE, message = FALSE, out.width = "100%", fig.asp = 0.8, fig.width = 15}
-  params$plot
+
+  if(!is.na(params$annotationTable)){
+    params$plot +
+      geom_segment(data=params$annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
+                                                     xend=end,
+                                                     yend=(as.numeric(y)*(3)),
+                                                     tooltip = attributes),
+                   arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
+                                     type = "closed", ends = as.character(params$annotationTable$arrowEnd)),
+                   size=2, color=as.character(params$annotationTable$color))
+  } else {
+    params$plot
+  }
+
 ```
 
 ```{r echo = F}
