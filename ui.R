@@ -59,6 +59,7 @@ suppressMessages(suppressWarnings(library(tibble)))
 suppressMessages(suppressWarnings(library(xlsx)))
 suppressMessages(suppressWarnings(library(rlist)))
 suppressMessages(suppressWarnings(library(svglite)))
+suppressMessages(suppressWarnings(library(rmarkdown)))
 
 ################################################################################
 ###                           FUNCTIONS                                      ###

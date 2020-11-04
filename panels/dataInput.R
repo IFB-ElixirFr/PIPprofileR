@@ -256,6 +256,7 @@ observeEvent(input$okData, {
         if (!is.null(input$fileRData)){
           load(input$fileRData$datapath)
           genomes$genomesNto1 <- Nto1_list
+          genomes$seqType = genomes$genomesNto1$seqType
           
           plotlyRV$p = Nto1_list$plot$p
           plotlyRV$plotGG = Nto1_list$plot$plotGG
