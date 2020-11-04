@@ -433,66 +433,73 @@ createPIPprofile <- function(){
   seqColors = NULL
   
   ## Plot PIP profiles
-  i <- 1
-  for (j in length(alignments):1) {
-    subject <- names(alignments)[j]
-    alignment <- alignments[[j]]
+  
+  withProgress(message = 'PIP profile generation', value = 0, {
     
-    ## Get the aligned reference and query sequences
-    refSeq <- unlist(strsplit(as.character(pattern(alignment)), split = ""))
-    subjectSeq <- unlist(strsplit(as.character(subject(alignment)), split = ""))
-    
-    # ## Only keep the positions corresponding to the reference sequence (no gap in ref)
-    plotlyRV$refPositions <- refSeq != "-"
-    
-    ## Compute identity per position
-    identityProfile <- refSeq[plotlyRV$refPositions] == subjectSeq[plotlyRV$refPositions]
-    
-    
-    ## Compute PIP profile
-    pipProfile <- 100 * stats::filter(identityProfile, filter = rep(1/plotlyRV$windowSize, plotlyRV$windowSize))
-    
-    ## Compute PIP limits
-    if (is.null(leftLimit)) {
-      pipStart <- 1
-    } else {
-      pipStart <- leftLimit
+    i <- 1
+    for (j in length(alignments):1) {
+      incProgress(1/length(genomes$genomesNto1$alignments), 
+                  detail  = subject)
+      
+      subject <- names(alignments)[j]
+      alignment <- alignments[[j]]
+      
+      ## Get the aligned reference and query sequences
+      refSeq <- unlist(strsplit(as.character(pattern(alignment)), split = ""))
+      subjectSeq <- unlist(strsplit(as.character(subject(alignment)), split = ""))
+      
+      # ## Only keep the positions corresponding to the reference sequence (no gap in ref)
+      plotlyRV$refPositions <- refSeq != "-"
+      
+      ## Compute identity per position
+      identityProfile <- refSeq[plotlyRV$refPositions] == subjectSeq[plotlyRV$refPositions]
+      
+      
+      ## Compute PIP profile
+      pipProfile <- 100 * stats::filter(identityProfile, filter = rep(1/plotlyRV$windowSize, plotlyRV$windowSize))
+      
+      ## Compute PIP limits
+      if (is.null(leftLimit)) {
+        pipStart <- 1
+      } else {
+        pipStart <- leftLimit
+      }
+      if (is.null(rightLimit)) {
+        pipEnd <- length(identityProfile)
+      } else {
+        pipEnd <- rightLimit
+      }
+      
+      ## Compute mean PIP over the specified limits (pipStart, pipEnd)
+      meanPIP <- round(digits = 3, 100 * sum(identityProfile[pipStart:pipEnd],na.rm = TRUE) / length(identityProfile))
+      meanPIPs <- c(meanPIPs, setNames(meanPIP,paste0(subject, " (", round(digits = 1, meanPIP), "%)")))
+      
+      
+      message("\t", i, "/", nbAlignments,
+              "\tpid = ", round(digits = 2, pid(alignment)),
+              "\t", subject,
+              "\tfrom ", pipStart,
+              "\tto ", pipEnd,
+              "\tmeanPIP = ", meanPIP
+      )
+      
+      ## Sequence color
+      if (is.null(colors[subject])) {
+        seqColor <- colors[j]
+      } else {
+        seqColor <- colors[subject]
+      }
+      
+      seqColors = c(seqColors, seqColor)
+      
+      ggplotTable = rbind.data.frame(
+        ggplotTable, 
+        cbind.data.frame(x = pipStart:pipEnd,
+                         y = pipProfile[pipStart:pipEnd],
+                         name = paste0(subject, " (", round(digits = 1, meanPIP), "%)"))
+      )
     }
-    if (is.null(rightLimit)) {
-      pipEnd <- length(identityProfile)
-    } else {
-      pipEnd <- rightLimit
-    }
-    
-    ## Compute mean PIP over the specified limits (pipStart, pipEnd)
-    meanPIP <- round(digits = 3, 100 * sum(identityProfile[pipStart:pipEnd],na.rm = TRUE) / length(identityProfile))
-    meanPIPs <- c(meanPIPs, setNames(meanPIP,paste0(subject, " (", round(digits = 1, meanPIP), "%)")))
-    
-    
-    message("\t", i, "/", nbAlignments,
-            "\tpid = ", round(digits = 2, pid(alignment)),
-            "\t", subject,
-            "\tfrom ", pipStart,
-            "\tto ", pipEnd,
-            "\tmeanPIP = ", meanPIP
-    )
-    
-    ## Sequence color
-    if (is.null(colors[subject])) {
-      seqColor <- colors[j]
-    } else {
-      seqColor <- colors[subject]
-    }
-    
-    seqColors = c(seqColors, seqColor)
-    
-    ggplotTable = rbind.data.frame(
-      ggplotTable, 
-      cbind.data.frame(x = pipStart:pipEnd,
-                       y = pipProfile[pipStart:pipEnd],
-                       name = paste0(subject, " (", round(digits = 1, meanPIP), "%)"))
-    )
-  }
+  })
   
   ggplotTable$name = factor(ggplotTable$name, names(meanPIPs)[order(meanPIPs)])
   

@@ -29,15 +29,17 @@ alignNtoOne <- function(refSequence,
   seqNb <- length(querySequences)
   seqNames <- names(querySequences)
   
-  withProgress(message = 'Calculation in progress',
-               detail = 'This may take a while...', value = 0, {
+  withProgress(message = 'Alignment in progress', value = 0, {
                  
                  i <- 1
                  for (i in 1:seqNb) {
-                  incProgress(1/seqNb)
                    
                    subjectName <- seqNames[i]
+                   
+                   incProgress(1/seqNb, 
+                               detail = subjectName)
                    message("\t\tAligning sequence ", i, "/", seqNb,  "\t", subjectName)
+                   
                    alignment <- pairwiseAlignment(pattern = refSequence, 
                                                   subject = querySequences[i],
                                                   type = type) 
