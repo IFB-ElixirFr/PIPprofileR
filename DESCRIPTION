@@ -1,0 +1,43 @@
+Package: PIPprofileR
+Type: Package
+Title: PIPprofileR
+Version: 0.1.0
+Authors@R: c(person("Thomas", "Denecker", email = "thomas.denecker@france-bioinformatique.fr", 
+  role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1421-7641")),
+  person("Jacques", "van Helden", email = "jacques.van-Helden@france-bioinformatique.fr", 
+  role = "ctb", comment = c(ORCID = "0000-0002-8799-8584")),
+  person("Hélène", "Chiapello", email = "helene.chiapello@inrae.fr", 
+  role = "ctb", comment = c(ORCID = "0000-0001-5102-0632")) )
+URL: https://github.com/IFB-ElixirFr/PIPprofileR
+BugReports: https://github.com/IFB-ElixirFr/PIPprofileR/issues
+Maintainer: Thomas DENECKER <thomas.denecker@france-bioinformatique.fr>
+Description: PIPprofileR is a shiny application to easily generate and explore Profiles of Percent Identical Positions from a fasta file (nucloetide or peptide sequences)
+Depends:
+  R (>= 3.6.3)
+biocViews:
+Imports:
+  ape,
+  Biostrings,
+  colourpicker,
+  DECIPHER,
+  dplyr,
+  DT,
+  knitr,
+  reshape2,
+  rmarkdown,
+  rlist,
+  shiny,
+  shinyalert,
+  shinycssloaders,
+  shinycustomloader,
+  shinydashboard,
+  shinydashboardPlus,
+  shinyhelper,  
+  shinyjs,
+  shinyWidgets,
+  svglite,
+  tibble
+License: BSD 3-Clause "New" or "Revised" License
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1

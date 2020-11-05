@@ -1,0 +1,132 @@
+---
+title: "PIP profiler report"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    
+params:
+  si: NA
+  genomes : NA
+  plot : NA
+  windows : NA
+  annotationTable: NA
+---
+
+# Summary
+
+```{r echo = F , out.width = "100%"}
+  HTML(paste0("<p><b>Name </b>: ",names(params$genomes$genomesNto1$reference),"</p>"))
+  HTML(paste0("<p><b>Size </b>: ",nchar(params$genomes$genomesNto1$reference),"</p>"))
+
+  if(params$genomes$genomesNto1$seqType == "DNA"){
+    HTML("<p><b>Sequence Type </b>:  Nucleic acid sequence</p>")
+  } else {
+    HTML("<p><b>Sequence Type </b>: Protein sequence</p>")
+  }
+  
+  datatable(params$genomes$SummarySequence, options = list(scrollX = TRUE))
+```
+
+
+# PIP profiles
+
+
+```{r  echo = F, warning = FALSE, message = FALSE, out.width = "100%", fig.asp = 0.8, fig.width = 15}
+
+  if(!is.na(params$annotationTable)){
+    params$plot +
+      geom_segment(data=params$annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
+                                                     xend=end,
+                                                     yend=(as.numeric(y)*(3)),
+                                                     tooltip = attributes),
+                   arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
+                                     type = "closed", ends = as.character(params$annotationTable$arrowEnd)),
+                   size=2, color=as.character(params$annotationTable$color))
+  } else {
+    params$plot
+  }
+
+```
+
+```{r echo = F}
+  HTML(paste0("<p><b>Windows size  </b>: ",params$windows,"</p>"))
+```
+
+```{r echo = F}
+  HTML(paste0("<p><b>A  </b>: ",params$windows,"</p>"))
+```
+
+# Alignments
+
+## Reference
+
+**Name** : `r names(params$genomes$genomesNto1$reference)`
+
+**Size** : `r nchar(params$genomes$genomesNto1$reference)`
+
+**Type of alignment** : `r params$genomes$genomesNto1$pairwiseType` 
+
+## Table
+
+```{r  echo = F, out.width = "100%"}
+datatable(params$genomes$genomesNto1$stats %>%  arrange(desc(score)), 
+          options = list(scrollX = TRUE))
+```
+
+## Distribution
+
+```{r  echo = F, out.width = "100%",}
+if(!is.null(params$plotlyRV$plotGG_scorePlot)){
+  params$plotlyRV$plotGG_scorePlot
+} else {
+  inter = cbind.data.frame(name = rownames(params$genomes$genomesNto1$stats), 
+                           score = round(params$genomes$genomesNto1$stats$score))
+  inter = inter[order(inter$score, decreasing = TRUE), ]
+  inter$name <- factor(inter$name, levels = inter$name)
+  
+  ggplot(data=inter, aes(x=name, y=score)) +
+    geom_bar(stat="identity", fill="steelblue")+
+    geom_text(aes(label=score), vjust=-0.3, size=3.5)+
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    labs(title="Score distribution",
+         x ="Species", y = "Score")
+}
+
+```
+
+```{r  echo = F, out.width = "100%",}
+
+if(!is.null(params$plotlyRV$plotGG_pidPlot)){
+  params$plotlyRV$plotGG_pidPlot
+} else {
+  inter = cbind.data.frame(name = rownames(params$genomes$genomesNto1$stats), 
+                           pid = round(params$genomes$genomesNto1$stats$pid))
+  inter = inter[order(inter$pid, decreasing = TRUE), ]
+  inter$name <- factor(inter$name, levels = inter$name)
+  
+  ggplot(data=inter, aes(x=name, y=pid)) +
+    geom_bar(stat="identity", fill="steelblue")+
+    geom_text(aes(label=pid), vjust=-0.3, size=3.5)+
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    labs(title="PID distribution",
+         x ="Species", y = "PID")
+}
+
+```
+
+# Session Information
+
+In this section is gathered all the information concerning the working 
+environment, the versions of the packages used ... to be able to reproduce the analyses.
+
+## R session information and parameters
+The versions of the R software and Bioconductor packages used for this analysis are listed below. 
+It is important to save them if one wants to re-perform the analysis in the same conditions.
+
+```{r  echo = F}
+sessionInfo()
+```
+
