@@ -5,6 +5,7 @@ RUN wget https://www.shinyproxy.io/downloads/shinyproxy-2.4.1.jar -O /opt/shinyp
 COPY application.yml /opt/shinyproxy/application.yml
 
 WORKDIR /opt/shinyproxy/
+RUN mkdir /opt/shinyproxy/log/
 
 EXPOSE 80
 
