@@ -57,6 +57,7 @@ RUN Rscript -e "install.packages('devtools', repos='https://cran.rstudio.com/', 
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
 ## Install packages PIPprofileR
+ARG INCUBATOR_VER=unknown
 RUN Rscript -e "library(devtools) ; install_github('IFB-ElixirFr/PIPprofileR')" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 

@@ -5,7 +5,7 @@
 PIPprofileR is a tool to easily generate and explore Profiles of Percent Identical Positions from a fasta file (nucloetide or peptide sequences).
 
 ## PIPprofileR & Docker
-The PIPprofiler application was developed with Docker and the image containing R and all necessary libraries is available online ([here](https://hub.docker.com/repository/docker/tdenecker/pip-profiler)). 
+The PIPprofiler application was developed with Docker and the image containing R and all necessary libraries is available online ([here](https://hub.docker.com/repository/docker/tdenecker/pip-profiler)).
 Using PIPprofiler by this method guarantees reproducibility of the analyses.
 
 ### Requirements
@@ -99,9 +99,61 @@ PIPprofileR is available as an R package. You can install it as follows:
 
 library(devtools)
 install_github('IFB-ElixirFr/PIPprofileR')
+
+PIPprofileR::shiny_application(port = 3838, host = '0.0.0.0')
 ```
 
 **Warning** : The packages may be different from those used during the development of the application. This method does not guarantee reproducibility.
+
+## PIPprofileR & ShinyProxy
+
+The limitation of the previous approaches is that the launch of the Shiny application is only done on a CPU. When several users are connected, performance drops sharply. One solution is to use [Shinyproxy](https://www.shinyproxy.io/).
+
+Shinyproxy is a java application that allows to deploy Shiny applications without any limit, either in number of applications or in number of users. The only limit is the resources you have at your disposal to run this service (CPU and RAM).
+
+When the user connects to the Shinyproxy set up, the user chooses the application among the available Shiny applications. A container docker of the application is then launched and the user is redirected to the application.
+
+This approach has been tested in an [ubuntu 20.04 VM](https://biosphere.france-bioinformatique.fr/catalogue/appliance/173/) in the [IFB cloud](https://www.france-bioinformatique.fr/cloud-ifb/). 
+
+### Download configuration files
+
+``` bash
+mkdir shinyProxy
+cd shinyProxy/
+
+wget https://raw.githubusercontent.com/IFB-ElixirFr/PIPprofileR/main/shinyProxy/Dockerfile
+wget https://raw.githubusercontent.com/IFB-ElixirFr/PIPprofileR/main/shinyProxy/application.yml
+```
+
+### Build docker network
+
+``` bash
+docker network create sp-network
+```
+
+### Build docker Shinyproxy image
+
+``` bash
+docker build -t shinyproxy .
+```
+
+### Import PIPprofileR image
+
+``` bash
+docker pull tdenecker/pip-profiler
+```
+
+### Run PIPprofileR
+
+``` bash
+sudo docker run -d -v /var/run/docker.sock:/var/run/docker.sock --net sp-network -p 443:80 shinyproxy
+```
+
+**WARNING** : The open port of the IFB cloud VMs is port 443 (which you can find in this part of command line `-p 443:80`). This port can change depending on the deployment location.
+
+### Open application
+
+If this method has been used in the IFB cloud VMs, Shiny proxi is available at https://XXX.XXX.XXX.XXX:443 where XXX.XXX.XXX.XXX is the IP address of the VM.
 
 ## Development
 
