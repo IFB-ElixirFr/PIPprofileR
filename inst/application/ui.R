@@ -41,8 +41,6 @@ suppressMessages(suppressWarnings(library(ape)))
 # Visualization
 #===============================================================================
 suppressMessages(suppressWarnings(library(DT)))
-suppressMessages(suppressWarnings(library(plotly)))
-suppressMessages(suppressWarnings(library(ggiraph)))
 suppressMessages(suppressWarnings(library(DECIPHER)))
 
 #===============================================================================
