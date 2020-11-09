@@ -22,6 +22,7 @@ Imports:
   DECIPHER,
   dplyr,
   DT,
+  ggplot2,
   knitr,
   reshape2,
   rmarkdown,

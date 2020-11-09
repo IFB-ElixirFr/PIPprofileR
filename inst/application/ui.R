@@ -42,6 +42,7 @@ suppressMessages(suppressWarnings(library(ape)))
 #===============================================================================
 suppressMessages(suppressWarnings(library(DT)))
 suppressMessages(suppressWarnings(library(DECIPHER)))
+suppressMessages(suppressWarnings(library(ggplot2)))
 
 #===============================================================================
 # Data treatment
