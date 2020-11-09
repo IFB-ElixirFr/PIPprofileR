@@ -7,21 +7,31 @@ jobs:
     name: Push Docker image to multiple registries
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      - 
+        name: Check out the repo
         uses: actions/checkout@v2
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tdenecker/pip-profiler:latest
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: tdenecker/pip-profiler
-          tag_with_ref: true
-          tags: tdenecker/pip-profiler:latest,tdenecker/pip-profiler:${{ env.STATE_RELEASE_VERSION }}
-      - name: Push to GitHub Packages
+      -
+        name: Build and push
+        id: docker_build
         uses: docker/build-push-action@v2
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: IFB-ElixirFr/pipprofiler/pip-profiler
+          push: true
           tag_with_ref: true
+          tags: tdenecker/pip-profiler:latest, 
+      -
+        name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
