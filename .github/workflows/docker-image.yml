@@ -15,6 +15,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: tdenecker/pip-profiler
+          tag_with_ref: true
           tags: tdenecker/pip-profiler:latest,tdenecker/pip-profiler:${{ env.STATE_RELEASE_VERSION }}
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2
