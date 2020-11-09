@@ -23,10 +23,10 @@ jobs:
           file: ./Dockerfile
           repository: tdenecker/pip-profiler
           tags: |
-            user/app:latest
-            user/app:${{ env.STATE_RELEASE_VERSION }}
+            tdenecker/pip-profiler:latest
+            tdenecker/pip-profiler:${{ env.STATE_RELEASE_VERSION }}
       - name: Push to GitHub Packages
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
