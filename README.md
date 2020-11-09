@@ -4,6 +4,8 @@
 
 PIPprofileR is a tool to easily generate and explore Profiles of Percent Identical Positions from a fasta file (nucloetide or peptide sequences).
 
+![Publish Docker image](https://github.com/IFB-ElixirFr/PIPprofileR/workflows/Publish%20Docker%20image/badge.svg)
+
 ## PIPprofileR & Docker
 The PIPprofiler application was developed with Docker and the image containing R and all necessary libraries is available online ([here](https://hub.docker.com/repository/docker/tdenecker/pip-profiler)).
 Using PIPprofiler by this method guarantees reproducibility of the analyses.
