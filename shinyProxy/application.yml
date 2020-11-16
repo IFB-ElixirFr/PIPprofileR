@@ -1,6 +1,7 @@
 proxy:
   port: 80
   container-wait-time: 30000
+  heartbeat-timeout: 600000
   container-log-path: /opt/shinyproxy/log/
   authentication: none
   admin-groups: admins
