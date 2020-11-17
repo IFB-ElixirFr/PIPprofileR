@@ -33,6 +33,10 @@ library(ggplot2)
 # Change directory
 setwd("/home/")
 
+
+date <- readLines("../../../monitoring.tsv", n = 1)
+date <- unlist(strsplit(date, "\t"))[2]
+
 #===============================================================================
 # Prepare data
 #===============================================================================
@@ -53,13 +57,30 @@ data <- subset(data,CPU_name != 'all' )
 # Plot
 #===============================================================================
 
-p <- ggplot(data, aes(x = Times, y = Percent, group = CPU_name, color = CPU_name)) + 
-  geom_line() +
-  geom_point() + theme_classic() + 
+firstInHour = na.omit(unlist(lapply(0:23,function(x){
+  if(x < 10){
+    grep(paste0("^0",x,":"), data$Times)[1]
+  } else
+  {
+    grep(paste0("^",x,":"), data$Times)[1]
+  }
+})))
+
+p <- ggplot(data, aes(x = Times, y = Percent, group = CPU_name, color = CPU_name)) +
+  labs(title=paste("Monitoring -", date),
+       x ="Times",
+       color = "CPU") +
+  geom_line() + theme_classic() +
+  scale_x_discrete(breaks = as.character(data$Times[firstInHour]), labels = as.character(data$Times[firstInHour])) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
 ggsave("monitoring_profile.png", p, units="in", width=15, height=5, dpi=300)
 
-p <- ggplot(data, aes(x = Times, y = Percent))+
-  geom_col(aes(fill = CPU_name), width = 0.7)+ theme_classic() + 
+p <- ggplot(data, aes(x = Times, y = Percent)) +
+  geom_col(aes(fill = CPU_name), width = 0.7)+ theme_classic() +
+  labs(title=paste("Monitoring -", date),
+       x ="Times",
+       fill = "CPU") +
+  scale_x_discrete(breaks = as.character(data$Times[firstInHour]), labels = as.character(data$Times[firstInHour])) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ggsave("monitoring_barplot.png", p, units="in", width=15, height=5, dpi=300)
