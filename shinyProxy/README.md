@@ -118,7 +118,7 @@ bash monitoring.sh
 
 In this documentation, we use the R available in the PIPprofileR docker image. This monitoring script only needs R with the ggplot package installed(`install.packages("ggplot2")`) to work. The different steps are : 
 
-``` bash 
+``` bash
 ### Write monitoring file
 sar -P ALL > monitoring.txt
 
@@ -133,5 +133,25 @@ docker run -it -v ${PWD}:/home/ tdenecker/pip-profiler bash -c "Rscript /home/mo
 
 Two graphs have been generated and can be retrieved by a scp :
 
-- `monitoring_barplot.png`
-- `monitoring_profile.png`
+- `monitoring_barplot_XX-XX-XX.png`
+- `monitoring_profile_XX-XX-XX.png`
+
+where `XX-XX-XX` is the date.
+
+#### Monitoring a specific day
+
+``` bash
+sar -P ALL -f /var/log/sysstat/sa17 > monitoring.txt
+```
+
+where sa17 is the 17th day of the month.
+
+#### 4- Exemples d'utilisation
+
+**Profile**
+
+<p align="center"><img src="./img/monitoring_profile_11-17-20.png" alt="logo" width="100%"></p>
+
+**Barplot**
+
+<p align="center"><img src="./img/monitoring_barplot_11-17-20.png" alt="logo" width="100%"></p>
