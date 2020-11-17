@@ -3,8 +3,8 @@
 # Maintener : Thomas Denecker
 # Email : thomas.denecker@gmail.com
 # Date : nov, 2020
-# GitHub :
-# DockerHub :
+# GitHub : https://github.com/IFB-ElixirFr/PIPprofileR
+# DockerHub : https://hub.docker.com/repository/docker/tdenecker/pip-profiler
 ################################################################################
 
 ################################################################################
@@ -60,6 +60,10 @@ data <- subset(data,CPU_name != 'all' )
 # Plot
 #===============================================================================
 
+#-------------------------------------------------------------------------------
+# Profile
+#-------------------------------------------------------------------------------
+
 firstInHour = na.omit(unlist(lapply(0:23,function(x){
   if(x < 10){
     grep(paste0("^0",x,":"), data$Times)[1]
@@ -69,21 +73,31 @@ firstInHour = na.omit(unlist(lapply(0:23,function(x){
   }
 })))
 
-p <- ggplot(data, aes(x = Times, y = Percent, group = CPU_name, color = CPU_name)) +
+p <- ggplot(data, aes(x = Times, y = Percent,
+                      group = CPU_name, color = CPU_name)) +
   labs(title=paste("Monitoring -", date),
        x ="Times",
        color = "CPU") +
   geom_line() + theme_classic() +
-  scale_x_discrete(breaks = as.character(data$Times[firstInHour]), labels = as.character(data$Times[firstInHour])) +
+  scale_x_discrete(breaks = as.character(data$Times[firstInHour]),
+                   labels = as.character(data$Times[firstInHour])) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-ggsave("monitoring_profile.png", p, units="in", width=15, height=5, dpi=300)
+ggsave(paste0("monitoring_profile_",date,".png"), p,
+       units="in", width=15, height=5, dpi=300)
+
+#-------------------------------------------------------------------------------
+# Barplot
+#-------------------------------------------------------------------------------
 
 p <- ggplot(data, aes(x = Times, y = Percent)) +
   geom_col(aes(fill = CPU_name), width = 0.7)+ theme_classic() +
   labs(title=paste("Monitoring -", date),
        x ="Times",
        fill = "CPU") +
-  scale_x_discrete(breaks = as.character(data$Times[firstInHour]), labels = as.character(data$Times[firstInHour])) +
+  scale_x_discrete(breaks = as.character(data$Times[firstInHour]),
+                   labels = as.character(data$Times[firstInHour])) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-ggsave("monitoring_barplot.png", p, units="in", width=15, height=5, dpi=300)
+
+ggsave(paste0("monitoring_barplot_",date,".png"), p,
+       units="in", width=15, height=5, dpi=300)
