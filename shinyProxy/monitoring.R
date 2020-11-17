@@ -33,6 +33,9 @@ library(ggplot2)
 # Change directory
 setwd("/home/")
 
+#===============================================================================
+# Get date
+#===============================================================================
 
 date <- readLines("monitoring.tsv", n = 1)
 date <- unlist(strsplit(date, "\t"))[2]
