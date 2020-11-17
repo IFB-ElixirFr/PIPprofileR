@@ -34,7 +34,7 @@ library(ggplot2)
 setwd("/home/")
 
 
-date <- readLines("../../../monitoring.tsv", n = 1)
+date <- readLines("monitoring.tsv", n = 1)
 date <- unlist(strsplit(date, "\t"))[2]
 
 #===============================================================================
