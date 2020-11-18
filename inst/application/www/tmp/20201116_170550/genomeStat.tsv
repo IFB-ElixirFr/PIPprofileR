@@ -1,0 +1,15 @@
+status	length	n	species	color
+1	Reference	1242	1	Bat	#888888
+2	Query	1242	2	Bat	#888888
+3	Query	1269	3	Bat	#888888
+4	Query	1255	4	Bat	#888888
+5	Query	1233	5	Bat	#888888
+6	Query	1256	6	Bat	#888888
+7	Query	1246	7	Bat	#888888
+8	Query	1245	8	Bat	#888888
+9	Query	1255	9	Civet	#00BBFF
+10	Query	1273	10	Human	#880000
+11	Query	1255	11	Human	#880000
+12	Query	1265	12	Pangolin	#448800
+13	Query	1269	13	Pangolin	#448800
+14	Query	1265	14	Pangolin	#448800

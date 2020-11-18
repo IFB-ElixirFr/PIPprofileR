@@ -157,5 +157,6 @@ observeEvent(input$okAnnot, {
   rvAnnotation$annotationTmp <- NULL
   removeModal()
   shinyjs::show(id = "geneExplore")
+  rvEnvent$loadAnnot <- T
   updateTabItems(session, "tabs", selected = "annotationTabItem")
 })
