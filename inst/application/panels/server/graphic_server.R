@@ -166,15 +166,19 @@ output$plotGGPLOT <- renderPlot({
 
       plotlyRV$annotationTable = annotationTable
 
-      plotlyRV$plotGG +
-      geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
+      plotlyRV$plotGG + geom_rect(inherit.aes = FALSE, data = data.frame(xmin = -Inf,
+                                                                        xmax = Inf,
+                                                                        ymin = 101,
+                                                                        ymax = Inf),
+                                 aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                                 fill = "white") +
+      geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3) + 105),
                                                      xend=end,
-                                                     yend=(as.numeric(y)*(3)),
+                                                     yend=(as.numeric(y)*(3) + 105),
                                                      tooltip = attributes),
                    arrow=grid::arrow(length = grid::unit(0.01, "npc"),
                                      type = "closed", ends = as.character(annotationTable$arrowEnd)),
                    size=2, color=as.character(annotationTable$color))
-
     }
   } else {
     NULL
@@ -197,19 +201,25 @@ output$hover_info <- renderUI({
                                  pull (printText), collapse = ""),
                          "</tbody></table>", collapse=""))
 
+
+
   if(!is.null(input$plot_hover)){
     hover=input$plot_hover
 
     if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
-      HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>PIP</th></tr></thead><tbody>",
+
+      HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
                  paste(plotlyRV$p %>%
-                         filter(as.numeric(x) == round(hover$x)) %>%
+                         select(name) %>%
+                         distinct(name) %>%
                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-                         mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
-                                printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
+                         mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
+                         left_join(Nto1_list$plot$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
+                         mutate(printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
                          ) %>%
                          pull (printText), collapse = ""),
                  "</tbody></table>", collapse=""))
+
     } else {
       emptyTemp
     }
@@ -347,7 +357,7 @@ observeEvent(genomes$genomesNto1$alignments, {
 
 
       updateSliderInput(session, "ylimRange",
-                        min = 0, max = 100,
+                        min = 0, max = 120,
                         value = c(plotlyRV$ylim[1], plotlyRV$ylim[2])
       )
       updateTextInput(session, "titleInput_main", value = plotlyRV$title_main)
@@ -521,7 +531,7 @@ createPIPprofile <- function(keepColor){
   plotlyRV$title_legende = 'Species'
 
   plotlyRV$xlim = c(0,length(plotlyRV$refPositions))
-  plotlyRV$ylim = c(0,100)
+  plotlyRV$ylim = c(0,120)
 
   plotlyRV$colMinorX = input$colMinorX
   plotlyRV$sizeMinorX = input$sizeMinorX
