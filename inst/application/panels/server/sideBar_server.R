@@ -1,5 +1,8 @@
-observeEvent(rvEnvent$load, {
-  if(rvEnvent$load){
+observeEvent({
+  rvEnvent$load
+  rvEnvent$loadAnnot
+  } , {
+  if(rvEnvent$load | rvEnvent$loadAnnot){
     output$sidebar <- renderUI({
       sidebarMenu( id = "tabs",
                    menuItem("Home", tabName = "home", icon = icon("home")),
@@ -9,26 +12,33 @@ observeEvent(rvEnvent$load, {
                                 icon = icon("upload"),
                                 width = 200
                    ),
+
                    actionButton("annotButton",
                                 "Import annotation",
                                 icon = icon("upload"),
                                 width = 200
                    ),
-                   if(!is.null(rvAnnotation$annotation) | input$dataset =="input" | (input$dataset == "demo" & input$demoType == "fasta" ) ){
+
+                   if(!is.null(rvAnnotation$annotation) | rvEnvent$load && (input$dataset =="input" | (input$dataset == "demo" & input$demoType == "fasta" ))){
                      p(style = "text-align: center;margin: 0px; font-weight: bold; background-color: #3c8dbc;padding: 5px;", 'Settings')
                    },
 
                    if( !is.null(rvAnnotation$annotation)){
                      menuItem("Annotations", tabName ="annotationTabItem", icon = icon("pen"))
                    },
-                   if( input$dataset =="input" | (input$dataset == "demo" & input$demoType == "fasta" ) ){
+
+                   if( rvEnvent$load && (input$dataset =="input" | (input$dataset == "demo" & input$demoType == "fasta" ))){
                      menuItem("Filters",tabName = "sequenceFilters", icon = icon("filter"))
                    },
-                   p(style = "text-align: center;margin: 0px; font-weight: bold; background-color: #3c8dbc;padding: 5px;", 'Results'),
-                   menuItem("Sequences information", tabName = "resume", icon = icon("file")),
-                   menuItem("PIP profile", tabName = "graphic", icon = icon("chart-area")),
-                   menuItem("Alignment", tabName = "alignmentTabItem", icon = icon("equals")),
-                   downloadButton("downloadData", label = "Download", style = "width:200px;color: #444 !important; margin : 15px"),
+
+                   if(rvEnvent$load){
+                     tagList(p(style = "text-align: center;margin: 0px; font-weight: bold; background-color: #3c8dbc;padding: 5px;", 'Results'),
+                     menuItem("Sequences information", tabName = "resume", icon = icon("file")),
+                     menuItem("PIP profile", tabName = "graphic", icon = icon("chart-area")),
+                     menuItem("Alignment", tabName = "alignmentTabItem", icon = icon("equals")),
+                     downloadButton("downloadData", label = "Download", style = "width:200px;color: #444 !important; margin : 15px"))
+                   },
+
                    p(style = "text-align: center;margin: 0px; font-weight: bold; background-color: #3c8dbc;padding: 5px;", 'More'),
                    menuItem("Session", tabName = "about", icon = icon("cubes")),
                    menuItem("Help", tabName = "helpPage", icon = icon("question-circle"))

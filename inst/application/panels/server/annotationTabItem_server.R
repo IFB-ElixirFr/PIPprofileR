@@ -11,9 +11,17 @@ observeEvent(rvAnnotation$annotation, {
     type = gsub("_", " ", type)
     type = sort(setNames(names(type), firstup(type) ))
 
+    if( any(names(type) == "CDS")){
+      selectedType = "CDS"
+    } else if (any(names(type) == "gene")){
+      selectedType = "gene"
+    } else {
+      selectedType = type[1]
+    }
+
     updateSelectInput(session, "typeSelector",
                       choices = type,
-                      selected = type[1]
+                      selected = selectedType
     )
   }
 })
@@ -30,9 +38,16 @@ observeEvent(input$typeSelector, {
     listExtractName = gsub("_", " ", listExtractName)
     listExtractName = sort(setNames(names(listExtractName), firstup(listExtractName)))
 
+    if(any(listExtractName == "gene")){
+      listExtractNameSelected = "gene"
+    }
+    else {
+      listExtractNameSelected = listExtractName[1]
+    }
+
     updateSelectInput(session, "nameAttributesSelector",
                       choices = listExtractName,
-                      selected = listExtractName[1]
+                      selected = listExtractNameSelected
     )
   }
 })
