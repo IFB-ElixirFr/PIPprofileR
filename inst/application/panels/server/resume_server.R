@@ -34,11 +34,19 @@ output$resumeQuery <-  renderDataTable({
 
 
 output$refName_ui <- renderUI(
-  HTML(paste0("<p><b>Name </b>: ",names(genomes$genomesNto1$reference),"</p>"))
+  HTML(paste0("<p><b>Reference name </b>: ",names(genomes$genomesNto1$reference),"</p>"))
 )
 
 output$refSize_ui <- renderUI(
-  HTML(paste0("<p><b>Size </b>: ",nchar(genomes$genomesNto1$reference),"</p>"))
+  HTML(paste0("<p><b>Reference size </b>: ",nchar(genomes$genomesNto1$reference),"</p>"))
+)
+
+output$querrySizeMean_ui <- renderUI(
+  HTML(paste0("<p><b>Mean size of query sequences </b>: ",round(mean(unlist(lapply(genomes$genomesNto1$alignments, nchar)))),"</p>"))
+)
+
+output$nbQuerry <- renderUI(
+  HTML(paste0("<p><b>Number of query sequences </b>: ",length(genomes$genomesNto1$alignments),"</p>"))
 )
 
 output$refType_ui <- renderUI(
