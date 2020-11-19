@@ -12,10 +12,10 @@ firstup <- function(x) {
 ################################################################################
 
 output$plotArea <- renderUI(
-    withLoader(plotOutput("plotGGPLOT", height = "500px",
-                          hover = hoverOpts(id ="plot_hover", delay=100),
-                          click = clickOpts(id ="plot_click"),
-                          brush = brushOpts(id ="plot_brush", delay=100)))
+  withLoader(plotOutput("plotGGPLOT", height = "500px",
+                        hover = hoverOpts(id ="plot_hover", delay=100),
+                        click = clickOpts(id ="plot_click"),
+                        brush = brushOpts(id ="plot_brush", delay=100)))
 )
 
 output$plotArea_title <- renderUI(
@@ -28,6 +28,14 @@ output$plotArea_title <- renderUI(
     h1("PIP profile")
   }
 
+)
+
+output$typeSequencesPIP <- renderUI(
+  if(genomes$seqType == "DNA"){
+    p("Nucleic acid sequences")
+  } else {
+    p("Protein sequences")
+  }
 )
 
 output$resumeGene_general <- renderUI({
@@ -138,24 +146,31 @@ output$plotGGPLOT <- renderPlot({
       levelAnnot <- vector(mode = "list", length = 5)
       names(levelAnnot) <- 0:4
       annotationTable <- annotationTable %>% arrange(start)
+      position = NULL
       for(i in 1:nrow(annotationTable)){
 
-        if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[1]]])){
+        if(is.null(levelAnnot[[1]]) | all(annotationTable$start[i] > (annotationTable$end[levelAnnot[[1]]] +100) )){
           levelAnnot[[1]] = c(levelAnnot[[1]], i)
-        } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[2]]])) {
+          position = c(position, 0)
+        } else if(is.null(levelAnnot[[2]]) | all(annotationTable$start[i] > (annotationTable$end[levelAnnot[[2]]]+100))) {
           levelAnnot[[2]] = c(levelAnnot[[2]], i)
-        }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[3]]])) {
+          position = c(position, 1)
+        }else if(is.null(levelAnnot[[3]]) | all(annotationTable$start[i] > (annotationTable$end[levelAnnot[[3]]]+100))) {
           levelAnnot[[3]] = c(levelAnnot[[3]], i)
-        }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[4]]])) {
+          position = c(position, 2)
+        }else if(is.null(levelAnnot[[4]]) | all(annotationTable$start[i] > (annotationTable$end[levelAnnot[[4]]]+100))) {
           levelAnnot[[4]] = c(levelAnnot[[4]], i)
-        }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > annotationTable$end[levelAnnot[[5]]])) {
+          position = c(position, 3)
+        }else if(is.null(levelAnnot[[5]]) | all(annotationTable$start[i] > (annotationTable$end[levelAnnot[[5]]]+100))) {
           levelAnnot[[5]] = c(levelAnnot[[5]], i)
+          position = c(position, 4)
         } else {
           levelAnnot[[1]] = c(levelAnnot[[1]], i)
+          position = c(position, 0)
         }
       }
 
-      annotationTable$y = rep(names(levelAnnot), lengths(levelAnnot))
+      annotationTable$y = position
       annotationTable = annotationTable %>%
         mutate(arrowEnd = case_when(strand == "+" ~ "last",
                                     strand == "-" ~ "first"),
@@ -167,18 +182,18 @@ output$plotGGPLOT <- renderPlot({
       plotlyRV$annotationTable = annotationTable
 
       plotlyRV$plotGG + geom_rect(inherit.aes = FALSE, data = data.frame(xmin = -Inf,
-                                                                        xmax = Inf,
-                                                                        ymin = 101,
-                                                                        ymax = Inf),
-                                 aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                                 fill = "white") +
-      geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3) + 105),
-                                                     xend=end,
-                                                     yend=(as.numeric(y)*(3) + 105),
-                                                     tooltip = attributes),
-                   arrow=grid::arrow(length = grid::unit(0.01, "npc"),
-                                     type = "closed", ends = as.character(annotationTable$arrowEnd)),
-                   size=2, color=as.character(annotationTable$color))
+                                                                         xmax = Inf,
+                                                                         ymin = 101,
+                                                                         ymax = Inf),
+                                  aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                                  fill = "white") +
+        geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3) + 105),
+                                                       xend=end,
+                                                       yend=(as.numeric(y)*(3) + 105),
+                                                       tooltip = attributes),
+                     arrow=grid::arrow(length = grid::unit(0.01, "npc"),
+                                       type = "closed", ends = as.character(annotationTable$arrowEnd)),
+                     size=2, color=as.character(annotationTable$color))
     }
   } else {
     NULL
@@ -214,7 +229,7 @@ output$hover_info <- renderUI({
                          distinct(name) %>%
                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
-                         left_join(Nto1_list$plot$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
+                         left_join(plotlyRV$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
                          mutate(printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
                          ) %>%
                          pull (printText), collapse = ""),
@@ -243,17 +258,20 @@ output$hover_info_annot <- renderUI({
 output$brush_info <- renderUI({
   if(!is.null(input$plot_brush)){
     brush=input$plot_brush
+
     if(nrow(plotlyRV$p %>%
-       filter(plotlyRV$p$x >= brush$xmin,
-              plotlyRV$p$x <= brush$xmax) %>%
-       group_by(name) ) != 0){
-      HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>",
+            filter(plotlyRV$p$x >= brush$xmin,
+                   plotlyRV$p$x <= brush$xmax) %>%
+            group_by(name) ) != 0){
+      HTML(paste("<b>Start </b>: " , round(brush$xmin), " - <b>End </b>: ", round(brush$xmax)," - Length </b>: ",   round(brush$xmax - brush$xmin),
+                 "<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>",
                  paste(plotlyRV$p %>%
                          filter(plotlyRV$p$x >= brush$xmin,
                                 plotlyRV$p$x <= brush$xmax) %>%
                          group_by(name) %>%
                          summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
-                         mutate(color = plotlyRV$colors[name],
+                         arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+                         mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
                                 printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(mean_size, 1),"</td><tr>")
                          ) %>%
                          pull (printText), collapse = ""),

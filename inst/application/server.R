@@ -159,6 +159,27 @@ shinyServer(function(input, output, session) {
     # Download
     #===========================================================================
 
+    output$downloadReport<- downloadHandler(
+        filename = paste0("report_",nameTmpFolder,".html"),
+        content = function(fname) {
+            params <- list(si = si,
+                           genomes = genomes,
+                           plot= plotlyRV$plotGG,
+                           windows = plotlyRV$windowSize)
+
+            if(!is.null(plotlyRV$annotationTable)) {
+                params$annotationTable = plotlyRV$annotationTable
+            } else {
+                params$annotationTable = NA
+            }
+
+            rmarkdown::render("report.Rmd", output_file = fname,
+                              params = params,
+                              envir = new.env(parent = globalenv())
+            )
+        }
+    )
+
     output$downloadData <- downloadHandler(
         filename = paste0(nameTmpFolder, ".zip"),
         content = function(fname) {

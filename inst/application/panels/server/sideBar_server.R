@@ -36,7 +36,10 @@ observeEvent({
                      menuItem("Sequences information", tabName = "resume", icon = icon("file")),
                      menuItem("PIP profile", tabName = "graphic", icon = icon("chart-area")),
                      menuItem("Alignment", tabName = "alignmentTabItem", icon = icon("equals")),
-                     downloadButton("downloadData", label = "Download", style = "width:200px;color: #444 !important; margin : 15px"))
+
+                     p(style = "text-align: center;margin: 0px; font-weight: bold; background-color: #3c8dbc;padding: 5px;", 'Export'),
+                     p(style="margin:0px;", downloadButton("downloadReport", label = "Report", style = "width:200px;color: #444 !important; margin : 6px 15px 3px 15px;")),
+                     downloadButton("downloadData", label = "Analysis", style = "width:200px;color: #444 !important; margin : 3px 15px 6px 15px;"))
                    },
 
                    p(style = "text-align: center;margin: 0px; font-weight: bold; background-color: #3c8dbc;padding: 5px;", 'More'),

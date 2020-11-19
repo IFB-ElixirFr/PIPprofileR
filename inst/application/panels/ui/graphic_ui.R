@@ -7,7 +7,7 @@ graphic <- fluidPage(
 
     column(6,
            fluidRow(
-             h2(tagList(shiny::icon("info-circle"), "Exploration PIP")),
+             h2(tagList(shiny::icon("info-circle"), "PIP statistics")),
              column(width = 6,
                     h3("Position values"),
                     helpText("Hover the plot to get the PIP values"),
@@ -24,7 +24,7 @@ graphic <- fluidPage(
     ),
     column(6,
            h2(tagList(shiny::icon("pen"), "Annotation")),
-           helpText("Hover over the plot to get the annotation information"),
+           helpText("Hover over the plot to get the annotation information. The blue arrows are strand + and the orange arrows strand -."),
            uiOutput("hover_info_annot")
     )
   ),
