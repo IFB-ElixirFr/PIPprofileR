@@ -332,6 +332,19 @@ output$pipExplo <-  DT::renderDataTable({
         mutate(y = "")
     }
 
+    inter <- inter %>%
+      left_join(
+        plotlyRV$p %>% filter(plotlyRV$p$x >= plotlyRV$xlim[1],
+                              plotlyRV$p$x <= plotlyRV$xlim[2]) %>%
+          group_by(name) %>%
+          summarize(mean_focus = mean(as.numeric(y), na.rm = TRUE),
+                    max_focus = max(as.numeric(y), na.rm = TRUE),
+                    min_focus = min(as.numeric(y), na.rm = TRUE)  )%>%
+          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+          select(name, min_focus, mean_focus, max_focus ),
+        by = "name") %>%
+      mutate(dif_mean_focus = Mean - mean_focus)
+
     if(!is.null(input$plot_brush)){
 
       brush=input$plot_brush
@@ -355,11 +368,11 @@ output$pipExplo <-  DT::renderDataTable({
           mutate(dif_mean = Mean - mean_brush)
       } else {
         inter <- inter %>%
-          mutate(min_brush= "", mean_brush= "", max_brush = "", dif_mean= "")
+          mutate(min_brush= NA, mean_brush= NA, max_brush = NA, dif_mean= NA)
       }
     } else {
       inter <- inter %>%
-        mutate(min_brush= NA, mean_brush= "", max_brush = "", dif_mean= "")
+        mutate(min_brush= NA, mean_brush= NA, max_brush = NA, dif_mean= NA)
     }
 
 
@@ -367,7 +380,9 @@ output$pipExplo <-  DT::renderDataTable({
       rename("Strains/Species" = name,
              "Hover" = y) %>%
       select("Color","Strains/Species", "Color", "Min", "1st Qu.", "Median",
-             "Mean", "3rd Qu.", "Max",  "Hover", min_brush, mean_brush, max_brush, dif_mean)
+             "Mean", "3rd Qu.", "Max",  "Hover",
+             min_focus, mean_focus, max_focus, dif_mean_focus,
+             min_brush, mean_brush, max_brush, dif_mean)
 
     if(!is.null(input$plot_hover)){
       hover=input$plot_hover
@@ -378,10 +393,12 @@ output$pipExplo <-  DT::renderDataTable({
 
     if(!is.null(input$plot_brush)){
       brush=input$plot_brush
-      textBrush = paste0("Selected area (Start : ",round(brush$xmin)," - End ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin), ")")
+      textBrush = paste0("Selected area <br>Start : ",round(brush$xmin)," - End ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin))
     } else {
       textBrush = "Selected area"
     }
+
+    textFocus = paste0("Focus area <br>Start : ",round(plotlyRV$xlim[1])," - End ",round(plotlyRV$xlim[2])," - Length : ", round(plotlyRV$xlim[2] - plotlyRV$xlim[1]))
 
     sketch = htmltools::withTags(table(
       class = 'display',
@@ -391,11 +408,13 @@ output$pipExplo <-  DT::renderDataTable({
           th(rowspan = 2, 'Strains/Species'),
           th(colspan = 6, 'Summary'),
           th(rowspan = 2, textHover),
+          th(colspan = 4,textFocus),
           th(colspan = 4,textBrush)
         ),
         tr(
           lapply(c("Min", "1st Qu.", "Median",
                    "Mean", "3rd Qu.", "Max",
+                   "Min", "Mean", "Max", "Mean diff",
                    "Min", "Mean", "Max", "Mean diff"), th)
         )
       )
@@ -404,7 +423,7 @@ output$pipExplo <-  DT::renderDataTable({
     dt = DT::datatable(inter, rownames = FALSE,  container = sketch,  colnames = c('', colnames(inter)[-1]),
                        selection = 'none',escape = F, options = list( scrollY = "500px",
                                                           paging=FALSE,  processing=FALSE,
-                                                          scrollX = TRUE,
+                                                          scrollX = "600px",
                                                           fixedColumns = list(leftColumns = c(1,2))),
     ) %>%
       formatStyle(
