@@ -1,7 +1,10 @@
 ---
-title: "PIP profiler report"
+pagetitle: "PIPprofileR repport"
 output:
   html_document:
+    includes:
+      in_header: rmarkdown/header.html
+      after_body: rmarkdown/bottom.html
     toc: true
     toc_float: true
     
@@ -11,72 +14,156 @@ params:
   plot : NA
   windows : NA
   annotationTable: NA
+  pipSTAT : NA
 ---
+```{css, echo=FALSE}
 
-# Summary
+h1 {
+  font-size: 25px;
+  background-color: #337ab7;
+    padding: 5px 10px;
+  color: white;
+  font-weight: bold;
+}
 
-```{r echo = F , out.width = "100%"}
-  HTML(paste0("<p><b>Name </b>: ",names(params$genomes$genomesNto1$reference),"</p>"))
-  HTML(paste0("<p><b>Size </b>: ",nchar(params$genomes$genomesNto1$reference),"</p>"))
+h2 {
+  color: #337ab7;
+    font-weight: bold;
+}
 
-  if(params$genomes$genomesNto1$seqType == "DNA"){
-    HTML("<p><b>Sequence Type </b>:  Nucleic acid sequence</p>")
-  } else {
-    HTML("<p><b>Sequence Type </b>: Protein sequence</p>")
-  }
-  
-  datatable(params$genomes$SummarySequence, options = list(scrollX = TRUE))
 ```
-
 
 # PIP profiles
 
+*Click on the image to enlarge it*
 
-```{r  echo = F, warning = FALSE, message = FALSE, out.width = "100%", fig.asp = 0.8, fig.width = 15}
+```{r  echo = F, warning = FALSE, message = FALSE, out.width = "100%", out.extra='id="PIPprofIMG"', fig.asp = 0.25, fig.width = 20, dpi = 200}
 
-  if(!is.na(params$annotationTable)){
-    params$plot +
-      geom_segment(data=params$annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3)),
-                                                     xend=end,
-                                                     yend=(as.numeric(y)*(3)),
-                                                     tooltip = attributes),
-                   arrow=grid::arrow(length = grid::unit(0.01, "npc"), 
-                                     type = "closed", ends = as.character(params$annotationTable$arrowEnd)),
-                   size=2, color=as.character(params$annotationTable$color))
-  } else {
-    params$plot
-  }
+if(!is.na(params$annotationTable)){
+  params$pipSTAT$plot
+} else {
+  params$plot
+}
 
 ```
 
-```{r echo = F}
-  HTML(paste0("<p><b>Windows size  </b>: ",params$windows,"</p>"))
+# PIP exploration
+
+```{r echo = F , out.width = "100%"}
+inter = params$pipSTAT$dt
+
+DT::datatable(inter, rownames = FALSE,  container = params$pipSTAT$sketch,  colnames = c('', colnames(inter)[-1]),
+              selection = 'none',escape = F, extensions = 'Buttons',
+              options = list( 
+                dom = 'BfRrltpi', 
+                autoWidth=TRUE,
+                paging=T, 
+                scrollX = T,
+                fixedColumns = list(leftColumns = c(1,2)), 
+                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')),
+) %>%
+  formatStyle(
+    'Color',
+    width='20px',
+    `font-size` ="1px",
+    color = styleEqual(
+      inter$Color, inter$Color
+    ),
+    backgroundColor = styleEqual(
+      inter$Color, inter$Color
+    )
+  ) %>% formatRound(3:ncol(inter), 2)
+
 ```
 
-```{r echo = F}
-  HTML(paste0("<p><b>A  </b>: ",params$windows,"</p>"))
+# Information
+## Resume
+
+**Reference sequence name** : `r names(params$genomes$genomesNto1$reference)`
+
+**Reference sequence size** : `r nchar(params$genomes$genomesNto1$reference)`
+
+```{r echo = F , out.width = "100%"}
+
+if(params$genomes$genomesNto1$seqType == "DNA"){
+  HTML("<p><b>Sequence Type </b>:  Nucleic acid sequence</p>")
+} else {
+  HTML("<p><b>Sequence Type </b>: Protein sequence</p>")
+}
+
 ```
-
-# Alignments
-
-## Reference
-
-**Name** : `r names(params$genomes$genomesNto1$reference)`
-
-**Size** : `r nchar(params$genomes$genomesNto1$reference)`
 
 **Type of alignment** : `r params$genomes$genomesNto1$pairwiseType` 
 
-## Table
+**Mean size of query sequences** : `r round(mean(unlist(lapply(params$genomes$genomesNto1$alignments, nchar))))` 
 
-```{r  echo = F, out.width = "100%"}
-datatable(params$genomes$genomesNto1$stats %>%  arrange(desc(score)), 
-          options = list(scrollX = TRUE))
+**Number of query sequences** : `r length(params$genomes$genomesNto1$alignments)` 
+
+**Type of alignment** : `r params$genomes$genomesNto1$pairwiseType` 
+
+## Sequence information
+
+```{r echo = F, warning = FALSE, message = FALSE, out.width = "100%"}
+if(is.null(params$genomes$SummarySequence)){
+  if(params$genomes$seqType == "DNA"){
+    resInter  = do.call("rbind", lapply(params$genomes$genomesNto1$sequences, function(s){
+      c(Size = nchar(s), (table(unlist(strsplit(as.character(s),"")))/nchar(s)) * 100)
+    }))
+    
+  } else {
+    suppressMessages(suppressWarnings(library(seqinr)))
+    
+    resInter <- do.call("rbind", lapply(params$genomes$genomesNto1$sequences, function(s){
+      
+      statInter = AAstat(unlist(strsplit(as.character(s), "")), plot = F)
+      vectInter = setNames(rep(0, 31),
+                           c("Pi", "Tiny","Small","Aliphatic" ,"Aromatic","Non.polar", "Polar","Charged","Basic","Acidic",
+                             "*","A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y"))
+      
+      vectInter[names(statInter$Compo)] = statInter$Compo
+      vectInter[names(unlist(statInter$Prop))] = round(unlist(statInter$Prop), 2)
+      vectInter["Pi"] = round(statInter$Pi, 2)
+      vectInter = c(Size = nchar(s), vectInter)
+    }))
+    
+    detach(package:seqinr)
+    
+    resInter
+  }
+  datatable(resInter, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
+                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+} else {
+  datatable(params$genomes$SummarySequence, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
+                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+}
+
 ```
 
-## Distribution
+```{r echo = F , out.width = "100%"}
+if(params$genomes$genomesNto1$seqType == "DNA"){
+  HTML("<h2>Annotation</h2>")
+}
+```
 
-```{r  echo = F, out.width = "100%",}
+```{r echo = F , out.width = "100%"}
+if(params$genomes$genomesNto1$seqType == "DNA"){
+  datatable(params$annotationTable[, 1:(ncol(params$annotationTable)-3)], escape = F, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
+                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+}
+```
+
+## Alignments
+
+### Resume
+
+```{r  echo = F, out.width = "100%"}
+datatable(params$genomes$genomesNto1$stats %>%  arrange(desc(score)), extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
+                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+```
+
+### Distribution
+
+```{r  echo = F, out.width = "100%"}
 if(!is.null(params$plotlyRV$plotGG_scorePlot)){
   params$plotlyRV$plotGG_scorePlot
 } else {
@@ -96,7 +183,7 @@ if(!is.null(params$plotlyRV$plotGG_scorePlot)){
 
 ```
 
-```{r  echo = F, out.width = "100%",}
+```{r  echo = F, out.width = "100%"}
 
 if(!is.null(params$plotlyRV$plotGG_pidPlot)){
   params$plotlyRV$plotGG_pidPlot

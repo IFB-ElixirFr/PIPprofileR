@@ -56,6 +56,7 @@ shinyServer(function(input, output, session) {
     features <- reactiveValues()
     species <- reactiveValues()
     plotlyRV <- reactiveValues()
+    RMD <- reactiveValues()
 
     rvEnvent$load = F
     rvEnvent$loadAnnot = F
@@ -165,7 +166,8 @@ shinyServer(function(input, output, session) {
             params <- list(si = si,
                            genomes = genomes,
                            plot= plotlyRV$plotGG,
-                           windows = plotlyRV$windowSize)
+                           windows = plotlyRV$windowSize,
+                           pipSTAT = RMD)
 
             if(!is.null(plotlyRV$annotationTable)) {
                 params$annotationTable = plotlyRV$annotationTable
@@ -210,7 +212,8 @@ shinyServer(function(input, output, session) {
                 params <- list(si = si,
                                genomes = genomes,
                                plot= plotlyRV$plotGG,
-                               windows = plotlyRV$windowSize)
+                               windows = plotlyRV$windowSize,
+                               RMD = RMD)
 
                 if(!is.null(plotlyRV$annotationTable)) {
                     params$annotationTable = plotlyRV$annotationTable

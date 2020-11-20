@@ -190,12 +190,12 @@ output$plotGGPLOT <- renderPlot({
 
       plotlyRV$annotationTable = annotationTable
 
-      plotlyRV$plotGG + geom_rect(inherit.aes = FALSE, data = data.frame(xmin = -Inf,
-                                                                         xmax = Inf,
-                                                                         ymin = 101,
-                                                                         ymax = Inf),
-                                  aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                                  fill = "white") +
+      RMD$plot <- plotlyRV$plotGG + geom_rect(inherit.aes = FALSE, data = data.frame(xmin = -Inf,
+                                                                                             xmax = Inf,
+                                                                                             ymin = 101,
+                                                                                             ymax = Inf),
+                                                      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                                                      fill = "white") +
         geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3) + 105),
                                                        xend=end,
                                                        yend=(as.numeric(y)*(3) + 105),
@@ -203,6 +203,8 @@ output$plotGGPLOT <- renderPlot({
                      arrow=grid::arrow(length = grid::unit(0.01, "npc"),
                                        type = "closed", ends = as.character(annotationTable$arrowEnd)),
                      size=2, color=as.character(annotationTable$color))
+
+      RMD$plot
     }
   } else {
     NULL
@@ -429,11 +431,14 @@ output$pipExplo <-  DT::renderDataTable({
       )
     ))
 
+    RMD$dt <- inter
+    RMD$sketch <- sketch
+
     dt = DT::datatable(inter, rownames = FALSE,  container = sketch,  colnames = c('', colnames(inter)[-1]),
                        selection = 'none',escape = F, options = list( scrollY = "500px",
-                                                          paging=FALSE,  processing=FALSE,
-                                                          scrollX = "600px",
-                                                          fixedColumns = list(leftColumns = c(1,2))),
+                                                                      paging=FALSE,  processing=FALSE,
+                                                                      scrollX = "600px",
+                                                                      fixedColumns = list(leftColumns = c(1,2))),
     ) %>%
       formatStyle(
         'Color',
