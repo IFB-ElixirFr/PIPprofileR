@@ -163,22 +163,24 @@ shinyServer(function(input, output, session) {
     output$downloadReport<- downloadHandler(
         filename = paste0("report_",nameTmpFolder,".html"),
         content = function(fname) {
-            params <- list(si = si,
-                           genomes = genomes,
-                           plot= plotlyRV$plotGG,
-                           windows = plotlyRV$windowSize,
-                           pipSTAT = RMD)
+            withProgress(message = 'Report rendering', {
+                params <- list(si = si,
+                               genomes = genomes,
+                               plot= plotlyRV$plotGG,
+                               windows = plotlyRV$windowSize,
+                               pipSTAT = RMD)
 
-            if(!is.null(plotlyRV$annotationTable)) {
-                params$annotationTable = plotlyRV$annotationTable
-            } else {
-                params$annotationTable = NA
-            }
+                if(!is.null(plotlyRV$annotationTable)) {
+                    params$annotationTable = plotlyRV$annotationTable
+                } else {
+                    params$annotationTable = NA
+                }
 
-            rmarkdown::render("report.Rmd", output_file = fname,
-                              params = params,
-                              envir = new.env(parent = globalenv())
-            )
+                rmarkdown::render("report.Rmd", output_file = fname,
+                                  params = params,
+                                  envir = new.env(parent = globalenv())
+                )
+            })
         }
     )
 
@@ -213,19 +215,19 @@ shinyServer(function(input, output, session) {
                                genomes = genomes,
                                plot= plotlyRV$plotGG,
                                windows = plotlyRV$windowSize,
-                               RMD = RMD)
+                               pipSTAT = RMD)
 
                 if(!is.null(plotlyRV$annotationTable)) {
                     params$annotationTable = plotlyRV$annotationTable
                 } else {
                     params$annotationTable = NA
                 }
-
-                rmarkdown::render("report.Rmd", output_file = file.path(tmpFolder,'report.html'),
-                                  params = params,
-                                  envir = new.env(parent = globalenv())
-                )
-
+                withProgress(message = 'Report rendering', {
+                    rmarkdown::render("report.Rmd", output_file = file.path(tmpFolder,'report.html'),
+                                      params = params,
+                                      envir = new.env(parent = globalenv())
+                    )
+                })
                 incProgress(1/step ,  detail  = "Zip")
                 oldDir <- getwd()
                 setwd(tmpFolder)

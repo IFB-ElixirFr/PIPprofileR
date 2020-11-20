@@ -16,6 +16,7 @@ params:
   annotationTable: NA
   pipSTAT : NA
 ---
+
 ```{css, echo=FALSE}
 
 h1 {
@@ -45,6 +46,7 @@ if(!is.na(params$annotationTable)){
   params$plot
 }
 
+shiny::setProgress(1/8) 
 ```
 
 # PIP exploration
@@ -73,7 +75,7 @@ DT::datatable(inter, rownames = FALSE,  container = params$pipSTAT$sketch,  coln
       inter$Color, inter$Color
     )
   ) %>% formatRound(3:ncol(inter), 2)
-
+shiny::setProgress(2/8) 
 ```
 
 # Information
@@ -90,7 +92,7 @@ if(params$genomes$genomesNto1$seqType == "DNA"){
 } else {
   HTML("<p><b>Sequence Type </b>: Protein sequence</p>")
 }
-
+shiny::setProgress(3/8) 
 ```
 
 **Type of alignment** : `r params$genomes$genomesNto1$pairwiseType` 
@@ -137,6 +139,7 @@ if(is.null(params$genomes$SummarySequence)){
                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
 }
 
+shiny::setProgress(4/8) 
 ```
 
 ```{r echo = F , out.width = "100%"}
@@ -150,6 +153,7 @@ if(params$genomes$genomesNto1$seqType == "DNA"){
   datatable(params$annotationTable[, 1:(ncol(params$annotationTable)-3)], escape = F, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
 }
+shiny::setProgress(5/8) 
 ```
 
 ## Alignments
@@ -159,6 +163,7 @@ if(params$genomes$genomesNto1$seqType == "DNA"){
 ```{r  echo = F, out.width = "100%"}
 datatable(params$genomes$genomesNto1$stats %>%  arrange(desc(score)), extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+shiny::setProgress(6/8) 
 ```
 
 ### Distribution
@@ -180,7 +185,7 @@ if(!is.null(params$plotlyRV$plotGG_scorePlot)){
     labs(title="Score distribution",
          x ="Species", y = "Score")
 }
-
+shiny::setProgress(7/8) 
 ```
 
 ```{r  echo = F, out.width = "100%"}
@@ -201,7 +206,7 @@ if(!is.null(params$plotlyRV$plotGG_pidPlot)){
     labs(title="PID distribution",
          x ="Species", y = "PID")
 }
-
+shiny::setProgress(8/8) 
 ```
 
 # Session Information
