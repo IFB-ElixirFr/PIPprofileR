@@ -550,10 +550,17 @@ observeEvent(input$updateGenes, {
   if(input$geneExplore_selector == "All"){
     plotlyRV$xlim = c(0,
                       length(plotlyRV$refPositions))
+
+
   } else {
     plotlyRV$xlim = sort(c(min(as.numeric(rvAnnotation$feature %>% filter(featureName == input$geneExplore_selector) %>% pull(start))),
                            max(as.numeric(rvAnnotation$feature %>% filter(featureName == input$geneExplore_selector) %>% pull(end)))))
   }
+
+  updateSliderInput(session, "xlimRange",
+                    min = 0, max = length(plotlyRV$refPositions),
+                    value = c(plotlyRV$xlim[1], plotlyRV$xlim[2])
+  )
 })
 
 observeEvent(input$updateColor, {

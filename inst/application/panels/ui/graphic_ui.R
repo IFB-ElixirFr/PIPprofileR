@@ -58,7 +58,7 @@ graphic <- fluidPage(
                                           numericInput("ggsave_dpi_scorePlot", label = "DPI", min = 1, value = 300 ),
                                           selectInput("ggsave_format_scorePlot", label = "Unit",
                                                       choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
-                                                      selected = "png"),
+                                                      selected = "pdf"),
                                           circle = TRUE, status = "myClass", icon = icon("gear"), width = "300px",
                                           tooltip = tooltipOptions(title = "Click to see save parameters !")
                                         )),
@@ -76,7 +76,7 @@ graphic <- fluidPage(
                                           numericInput("ggsave_dpi_pidPlot", label = "DPI", min = 1, value = 300 ),
                                           selectInput("ggsave_format_pidPlot", label = "Unit",
                                                       choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" )
-                                                      ,selected = "png"),
+                                                      ,selected = "pdf"),
                                           circle = TRUE, status = "myClass", icon = icon("gear"), width = "300px",
                                           tooltip = tooltipOptions(title = "Click to see save parameters !")
                                         )),
@@ -183,7 +183,7 @@ graphic <- fluidPage(
                            column(4,numericInput("ggsave_dpi", label = "DPI", min = 1, value = 300, width = '100%' )),
                            column(4, selectInput("ggsave_format", label = "Format",
                                                  choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
-                                                 selected = "png", width = '100%')),
+                                                 selected = "pdf", width = '100%')),
                            column(4, style="text-align:center;", downloadButton('downloadPlot','Download Plot')))
          )
   )
