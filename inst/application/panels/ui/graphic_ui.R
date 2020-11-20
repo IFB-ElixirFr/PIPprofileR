@@ -1,29 +1,24 @@
 graphic <- fluidPage(
   uiOutput("plotArea_title"),
   uiOutput("plotArea"),
-
   fluidRow(
-
-    column(6,
-           fluidRow(
-             h2(tagList(shiny::icon("info-circle"), "PIP exploration")),
-             # column(width = 6,
-             #        h3("Position values"),
-             #        helpText("Hover the plot to get the PIP values"),
-             #        uiOutput("hover_info")
-             # ),
-             # column(width = 6,
-             #        h3("Mean of selected region"),
-             #        helpText("Select an area.  The average of the PIPs for each strain in the zone will be calculated."),
-             #        uiOutput("brush_info")
-             #
-             # )
-
-             DT::dataTableOutput(outputId = "pipExplo",height = '500px')
-           )
-
+    column(8,
+           h2(tagList(shiny::icon("info-circle"), "PIP exploration")),
+           # column(width = 6,
+           #        h3("Position values"),
+           #        helpText("Hover the plot to get the PIP values"),
+           #        uiOutput("hover_info")
+           # ),
+           # column(width = 6,
+           #        h3("Mean of selected region"),
+           #        helpText("Select an area.  The average of the PIPs for each strain in the zone will be calculated."),
+           #        uiOutput("brush_info")
+           #
+           # )
+           helpText("The table below is dynamic. Hover the graph or select an area"),
+           DT::dataTableOutput(outputId = "pipExplo",height = '500px')
     ),
-    column(6,
+    column(4,
            h2(tagList(shiny::icon("pen"), "Annotation")),
            helpText("Hover over the plot to get the annotation information. The blue arrows are strand + and the orange arrows strand -."),
            uiOutput("hover_info_annot")
@@ -33,62 +28,62 @@ graphic <- fluidPage(
   h2(tagList(shiny::icon("table"), "Information")),
 
   fluidRow(tabBox(width =12,
-         title = NULL,
-         tabPanel("Resume",
-                  uiOutput("refName_ui"),
-                  uiOutput("refSize_ui"),
-                  uiOutput("refType_ui"),
-                  uiOutput("nbQuerry"),
-                  uiOutput("querrySizeMean_ui"),
-                  uiOutput("refTypeAlignemnt_ui"),
-         ),
-         tabPanel("Sequence information",
-                  withLoader(dataTableOutput(outputId = "resumeQuery"))
-         ),
-         tabPanel("PIP statistics",
-                  withLoader(dataTableOutput(outputId = "pipStat"))
-         ),
-         tabPanel("Alignments",
-                  withLoader(dataTableOutput(outputId = "resultNto1")),
-                  h3("Distribution"),
-                  fluidRow(
-                    column(6,
-                           withLoader(plotOutput("scorePlot", height = 700)),
-                           div(style="display: inline-block",
-                               dropdownButton(
-                                 tags$h3("Save parameters"),
-                                 numericInput("ggsave_width_scorePlot", label = "Width", min = 1, value = 29 ),
-                                 numericInput("ggsave_height_scorePlot", label = "Height", min = 1, value = 21 ),
-                                 selectInput("ggsave_unit_scorePlot", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm"),
-                                 numericInput("ggsave_dpi_scorePlot", label = "DPI", min = 1, value = 300 ),
-                                 selectInput("ggsave_format_scorePlot", label = "Unit",
-                                             choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
-                                             selected = "png"),
-                                 circle = TRUE, status = "myClass", icon = icon("gear"), width = "300px",
-                                 tooltip = tooltipOptions(title = "Click to see save parameters !")
-                               )),
-                           div(style="display: inline-block", downloadButton('downloadPlot_scorePlot','Download Plot'))
-                    ),
+                  title = NULL,
+                  tabPanel("Resume",
+                           uiOutput("refName_ui"),
+                           uiOutput("refSize_ui"),
+                           uiOutput("refType_ui"),
+                           uiOutput("nbQuerry"),
+                           uiOutput("querrySizeMean_ui"),
+                           uiOutput("refTypeAlignemnt_ui"),
+                  ),
+                  tabPanel("Sequence information",
+                           withLoader(dataTableOutput(outputId = "resumeQuery"))
+                  ),
+                  tabPanel("PIP statistics",
+                           withLoader(dataTableOutput(outputId = "pipStat"))
+                  ),
+                  tabPanel("Alignments",
+                           withLoader(dataTableOutput(outputId = "resultNto1")),
+                           h3("Distribution"),
+                           fluidRow(
+                             column(6,
+                                    withLoader(plotOutput("scorePlot", height = 700)),
+                                    div(style="display: inline-block",
+                                        dropdownButton(
+                                          tags$h3("Save parameters"),
+                                          numericInput("ggsave_width_scorePlot", label = "Width", min = 1, value = 29 ),
+                                          numericInput("ggsave_height_scorePlot", label = "Height", min = 1, value = 21 ),
+                                          selectInput("ggsave_unit_scorePlot", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm"),
+                                          numericInput("ggsave_dpi_scorePlot", label = "DPI", min = 1, value = 300 ),
+                                          selectInput("ggsave_format_scorePlot", label = "Unit",
+                                                      choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" ),
+                                                      selected = "png"),
+                                          circle = TRUE, status = "myClass", icon = icon("gear"), width = "300px",
+                                          tooltip = tooltipOptions(title = "Click to see save parameters !")
+                                        )),
+                                    div(style="display: inline-block", downloadButton('downloadPlot_scorePlot','Download Plot'))
+                             ),
 
-                    column(6,
-                           withLoader(plotOutput("pidPlot", height = 700)),
-                           div(style="display: inline-block",
-                               dropdownButton(
-                                 tags$h3("Save parameters"),
-                                 numericInput("ggsave_width_pidPlot", label = "Width", min = 1, value = 29 ),
-                                 numericInput("ggsave_height_pidPlot", label = "Height", min = 1, value = 21 ),
-                                 selectInput("ggsave_unit_pidPlot", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm"),
-                                 numericInput("ggsave_dpi_pidPlot", label = "DPI", min = 1, value = 300 ),
-                                 selectInput("ggsave_format_pidPlot", label = "Unit",
-                                             choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" )
-                                             ,selected = "png"),
-                                 circle = TRUE, status = "myClass", icon = icon("gear"), width = "300px",
-                                 tooltip = tooltipOptions(title = "Click to see save parameters !")
-                               )),
-                           div(style="display: inline-block", downloadButton('downloadPlot_pidPlot','Download Plot'))
-                    )
+                             column(6,
+                                    withLoader(plotOutput("pidPlot", height = 700)),
+                                    div(style="display: inline-block",
+                                        dropdownButton(
+                                          tags$h3("Save parameters"),
+                                          numericInput("ggsave_width_pidPlot", label = "Width", min = 1, value = 29 ),
+                                          numericInput("ggsave_height_pidPlot", label = "Height", min = 1, value = 21 ),
+                                          selectInput("ggsave_unit_pidPlot", label = "Unit", choices = c("in", "cm", "mm"),selected = "cm"),
+                                          numericInput("ggsave_dpi_pidPlot", label = "DPI", min = 1, value = 300 ),
+                                          selectInput("ggsave_format_pidPlot", label = "Unit",
+                                                      choices = c("eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" )
+                                                      ,selected = "png"),
+                                          circle = TRUE, status = "myClass", icon = icon("gear"), width = "300px",
+                                          tooltip = tooltipOptions(title = "Click to see save parameters !")
+                                        )),
+                                    div(style="display: inline-block", downloadButton('downloadPlot_pidPlot','Download Plot'))
+                             )
+                           )
                   )
-         )
   )),
 
   div(id = "geneExplore", style="display : none;",

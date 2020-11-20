@@ -204,64 +204,56 @@ output$plotGGPLOT <- renderPlot({
 # Explore
 ################################################################################
 
-# output$hover_info <- renderUI({
-#   emptyTemp = HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
-#                          paste(plotlyRV$p %>%
-#                                  select(name) %>%
-#                                  distinct(name) %>%
-#                                  arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-#                                  mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
-#                                         printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td></td><tr>")
-#                                  ) %>%
-#                                  pull (printText), collapse = ""),
-#                          "</tbody></table>", collapse=""))
-#
-#
-#
-#   if(!is.null(input$plot_hover)){
-#     hover=input$plot_hover
-#
-#     if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
-#
-#       HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
-#                  paste(plotlyRV$p %>%
-#                          select(name) %>%
-#                          distinct(name) %>%
-#                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-#                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
-#                          left_join(plotlyRV$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
-#                          mutate(printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
-#                          ) %>%
-#                          pull (printText), collapse = ""),
-#                  "</tbody></table>", collapse=""))
-#
-#     } else {
-#       emptyTemp
-#     }
-#
-#   } else {
-#
-#     emptyTemp
-#   }
-# })
+output$hover_info <- renderUI({
+  #   emptyTemp = HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
+  #                          paste(plotlyRV$p %>%
+  #                                  select(name) %>%
+  #                                  distinct(name) %>%
+  #                                  arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+  #                                  mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
+  #                                         printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td></td><tr>")
+  #                                  ) %>%
+  #                                  pull (printText), collapse = ""),
+  #                          "</tbody></table>", collapse=""))
+  #
+  #
+  #
+  #   if(!is.null(input$plot_hover)){
+  #     hover=input$plot_hover
+  #
+  #     if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
+  #
+  #       HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
+  #                  paste(plotlyRV$p %>%
+  #                          select(name) %>%
+  #                          distinct(name) %>%
+  #                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+  #                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
+  #                          left_join(plotlyRV$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
+  #                          mutate(printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
+  #                          ) %>%
+  #                          pull (printText), collapse = ""),
+  #                  "</tbody></table>", collapse=""))
+  #
+  #     } else {
+  #       emptyTemp
+  #     }
+  #
+  #   } else {
+  #
+  #     emptyTemp
+  #   }
 
-sketch = htmltools::withTags(table(
-  class = 'display',
-  thead(
-    tr(
-      th(rowspan = 2, ''),
-      th(rowspan = 2, 'Strains/Species'),
-      th(colspan = 6, 'Summary'),
-      th(rowspan = 2, 'Hover'),
-      th(colspan = 4, 'Selected area'),
-    ),
-    tr(
-      lapply(c("Min", "1st Quantile", "Median",
-               "Mean", "3rd Quantile", "Max",
-               "Min", "Mean", "Max", "Mean diff"), th)
-    )
-  )
-))
+  # or
+  # if(!is.null(input$plot_hover)){
+  #   hover=input$plot_hover
+  #   p(paste0("Hover position : ", round(hover$x)))
+  # } else {
+  #   p("Hover position : ")
+  # }
+})
+
+
 
 
 output$pipExplo <-  DT::renderDataTable({
@@ -377,9 +369,43 @@ output$pipExplo <-  DT::renderDataTable({
       select("Color","Strains/Species", "Color", "Min", "1st Qu.", "Median",
              "Mean", "3rd Qu.", "Max",  "Hover", min_brush, mean_brush, max_brush, dif_mean)
 
+    if(!is.null(input$plot_hover)){
+      hover=input$plot_hover
+      textHover = HTML(paste0("Hover <br>(pos. : ", round(hover$x), ")"))
+    } else {
+      textHover = "Hover"
+    }
+
+    if(!is.null(input$plot_brush)){
+      brush=input$plot_brush
+      textBrush = paste0("Selected area (Start : ",round(brush$xmin)," - End ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin), ")")
+    } else {
+      textBrush = "Selected area"
+    }
+
+    sketch = htmltools::withTags(table(
+      class = 'display',
+      thead(
+        tr(
+          th(rowspan = 2, ''),
+          th(rowspan = 2, 'Strains/Species'),
+          th(colspan = 6, 'Summary'),
+          th(rowspan = 2, textHover),
+          th(colspan = 4,textBrush)
+        ),
+        tr(
+          lapply(c("Min", "1st Qu.", "Median",
+                   "Mean", "3rd Qu.", "Max",
+                   "Min", "Mean", "Max", "Mean diff"), th)
+        )
+      )
+    ))
+
     dt = DT::datatable(inter, rownames = FALSE,  container = sketch,  colnames = c('', colnames(inter)[-1]),
-                       selection = 'none',options = list( scrollY = "500px",
-                                                          scrollX = T),
+                       selection = 'none',escape = F, options = list( scrollY = "500px",
+                                                          paging=FALSE,  processing=FALSE,
+                                                          scrollX = TRUE,
+                                                          fixedColumns = list(leftColumns = c(1,2))),
     ) %>%
       formatStyle(
         'Color',
@@ -410,35 +436,45 @@ output$hover_info_annot <- renderUI({
 })
 
 
-# output$brush_info <- renderUI({
-#   if(!is.null(input$plot_brush)){
-#     brush=input$plot_brush
-#
-#     if(nrow(plotlyRV$p %>%
-#             filter(plotlyRV$p$x >= brush$xmin,
-#                    plotlyRV$p$x <= brush$xmax) %>%
-#             group_by(name) ) != 0){
-#       HTML(paste("<b>Start </b>: " , round(brush$xmin), " - <b>End </b>: ", round(brush$xmax)," - Length </b>: ",   round(brush$xmax - brush$xmin),
-#                  "<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>",
-#                  paste(plotlyRV$p %>%
-#                          filter(plotlyRV$p$x >= brush$xmin,
-#                                 plotlyRV$p$x <= brush$xmax) %>%
-#                          group_by(name) %>%
-#                          summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
-#                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-#                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
-#                                 printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(mean_size, 1),"</td><tr>")
-#                          ) %>%
-#                          pull (printText), collapse = ""),
-#                  "</tbody></table>", collapse=""))
-#     } else {
-#       NULL
-#     }
-#
-#   } else {
-#     NULL
-#   }
-# })
+output$brush_info <- renderUI({
+  #   if(!is.null(input$plot_brush)){
+  #     brush=input$plot_brush
+  #
+  #     if(nrow(plotlyRV$p %>%
+  #             filter(plotlyRV$p$x >= brush$xmin,
+  #                    plotlyRV$p$x <= brush$xmax) %>%
+  #             group_by(name) ) != 0){
+  #       HTML(paste("<b>Start </b>: " , round(brush$xmin), " - <b>End </b>: ", round(brush$xmax)," - Length </b>: ",   round(brush$xmax - brush$xmin),
+  #                  "<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>",
+  #                  paste(plotlyRV$p %>%
+  #                          filter(plotlyRV$p$x >= brush$xmin,
+  #                                 plotlyRV$p$x <= brush$xmax) %>%
+  #                          group_by(name) %>%
+  #                          summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
+  #                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+  #                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
+  #                                 printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(mean_size, 1),"</td><tr>")
+  #                          ) %>%
+  #                          pull (printText), collapse = ""),
+  #                  "</tbody></table>", collapse=""))
+  #     } else {
+  #       NULL
+  #     }
+  #
+  #   } else {
+  #     NULL
+  #   }
+
+
+  # Or
+  # if(!is.null(input$plot_brush)){
+  #   brush=input$plot_brush
+  #   p(paste0("Start area position : ",round(brush$xmin)," - End area position : ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin)))
+  # } else {
+  #   tagList()
+  #   p("Start area position :  - End area position :  - Length : ")
+  # }
+})
 
 ################################################################################
 # Update
