@@ -126,6 +126,15 @@ observe({
   }
 })
 
+observeEvent(rvAnnotation$annotation, {
+  if(!is.null(rvAnnotation$annotation)){
+    plotlyRV$ylim = c(input$ylimRange[1],120)
+    updateSliderInput(session, "ylimRange",
+                      min = 0, max = 120,
+                      value = c(plotlyRV$ylim[1], plotlyRV$ylim[2])
+    )
+  }
+})
 
 output$plotGGPLOT <- renderPlot({
   if(!is.null(genomes$genomesNto1$alignments)) {
@@ -393,12 +402,12 @@ output$pipExplo <-  DT::renderDataTable({
 
     if(!is.null(input$plot_brush)){
       brush=input$plot_brush
-      textBrush = paste0("Selected area <br>Start : ",round(brush$xmin)," - End ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin))
+      textBrush = HTML(paste0("Selected area <br>Start : ",round(brush$xmin)," - End ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin)))
     } else {
       textBrush = "Selected area"
     }
 
-    textFocus = paste0("Focus area <br>Start : ",round(plotlyRV$xlim[1])," - End ",round(plotlyRV$xlim[2])," - Length : ", round(plotlyRV$xlim[2] - plotlyRV$xlim[1]))
+    textFocus = HTML(paste0("Focus area <br>Start : ",round(plotlyRV$xlim[1])," - End ",round(plotlyRV$xlim[2])," - Length : ", round(plotlyRV$xlim[2] - plotlyRV$xlim[1])))
 
     sketch = htmltools::withTags(table(
       class = 'display',
@@ -583,7 +592,6 @@ observeEvent(genomes$genomesNto1$alignments, {
                         value = c(plotlyRV$xlim[1], plotlyRV$xlim[2])
       )
 
-
       updateSliderInput(session, "ylimRange",
                         min = 0, max = 120,
                         value = c(plotlyRV$ylim[1], plotlyRV$ylim[2])
@@ -759,7 +767,7 @@ createPIPprofile <- function(keepColor){
   plotlyRV$title_legende = 'Species'
 
   plotlyRV$xlim = c(0,length(plotlyRV$refPositions))
-  plotlyRV$ylim = c(0,120)
+  plotlyRV$ylim = c(0,100)
 
   plotlyRV$colMinorX = input$colMinorX
   plotlyRV$sizeMinorX = input$sizeMinorX

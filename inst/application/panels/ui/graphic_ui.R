@@ -118,8 +118,8 @@ graphic <- fluidPage(
                     column(6,
                            h4("Limits"),
                            sliderInput("ylimRange", "Y limits",
-                                       min = 0, max = 120,
-                                       value = c(0,120),
+                                       min = 0, max = 100,
+                                       value = c(0,100),
                                        step = 1, width = '100%'
                            ),
                            sliderInput("xlimRange", 'X limits',
