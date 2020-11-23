@@ -132,15 +132,63 @@ if(is.null(params$genomes$SummarySequence)){
     
     resInter
   }
-  datatable(resInter, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
-                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+  
+  resInter <- as.data.frame(resInter) %>%
+    mutate(name = unlist(lapply(rownames(resInter), function(x){
+      pos = which(unlist(strsplit(x, "")) == "_")
+      pos = pos[length(pos)]
+      substr(x,1,pos-1)
+    })))
+  
+  message(as.character(as.data.frame(params$pipSTAT$dt)[,2]))
+  
+  inter = cbind.data.frame(allNames = as.data.frame(params$pipSTAT$dt)[,2], color = as.data.frame(params$pipSTAT$dt)[,1])  %>%
+    mutate(name = unlist(lapply(as.character(as.data.frame(params$pipSTAT$dt)[,2]), function(x){
+      pos = which(unlist(strsplit(x, "")) == "(")
+      pos = pos[length(pos)]
+      substr(x,1,pos-2)
+    })))
+  
+  resInter <- inter  %>%
+    left_join(resInter, by="name") %>%
+    mutate(name = allNames) %>%
+    select(-allNames) %>%
+    arrange(match(name, as.character(as.data.frame(params$pipSTAT$dt)[,2])))
+  
+  datatable(resInter,  rownames = FALSE,colnames = c('', colnames(resInter)[-1]),  extensions = 'Buttons', options = list(dom = 'BfRrltpi',
+                                                                                                                          autoWidth=TRUE,scrollX = TRUE, 
+                                                                                                                          buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))%>%
+    formatStyle(
+      'color',
+      width='20px',
+      `font-size` ="1px",
+      color = styleEqual(
+        resInter$color, resInter$color
+      ),
+      backgroundColor = styleEqual(
+        resInter$color, resInter$color
+      )
+    )
 } else {
-  datatable(params$genomes$SummarySequence, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
-                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+  datatable(params$genomes$SummarySequence, colnames = c('', colnames(params$genomes$SummarySequence)[-1]),
+            rownames = FALSE, extensions = 'Buttons', options = list(dom = 'BfRrltpi',autoWidth=TRUE, scrollX = TRUE, 
+                                                                     buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))%>%
+    formatStyle(
+      'color',
+      width='20px',
+      `font-size` ="1px",
+      color = styleEqual(
+        params$genomes$SummarySequence$color, params$genomes$SummarySequence$color
+      ),
+      backgroundColor = styleEqual(
+        params$genomes$SummarySequence$color, params$genomes$SummarySequence$color
+      )
+    )
 }
 
 shiny::setProgress(4/8) 
 ```
+
 
 ```{r echo = F , out.width = "100%"}
 if(params$genomes$genomesNto1$seqType == "DNA"){
@@ -151,7 +199,7 @@ if(params$genomes$genomesNto1$seqType == "DNA"){
 ```{r echo = F , out.width = "100%"}
 if(params$genomes$genomesNto1$seqType == "DNA"){
   datatable(params$annotationTable[, 1:(ncol(params$annotationTable)-3)], escape = F, extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
-                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+                                                                                                                             buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
 }
 shiny::setProgress(5/8) 
 ```
@@ -161,8 +209,37 @@ shiny::setProgress(5/8)
 ### Resume
 
 ```{r  echo = F, out.width = "100%"}
-datatable(params$genomes$genomesNto1$stats %>%  arrange(desc(score)), extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
-                buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+
+inter = cbind.data.frame(allNames = as.data.frame(params$pipSTAT$dt)[,2], color = as.data.frame(params$pipSTAT$dt)[,1])  %>%
+  mutate(name = unlist(lapply(as.character(as.data.frame(params$pipSTAT$dt)[,2]), function(x){
+    pos = which(unlist(strsplit(x, "")) == "(")
+    pos = pos[length(pos)]
+    substr(x,1,pos-2)
+  })))
+
+inter = inter %>% left_join(params$genomes$genomesNto1$stats  %>%
+                              mutate(name = rownames(params$genomes$genomesNto1$stats)),
+                            by="name") %>%  arrange(desc(score))  %>%
+  mutate(name = allNames) %>%
+  select(-allNames)  %>%
+  arrange(match(name, as.character(as.data.frame(params$pipSTAT$dt)[,2])))
+
+datatable(inter,  colnames = c('', colnames(inter)[-1]), 
+          extensions = 'Buttons', options = list(dom = 'BfRrltpi',scrollX = TRUE, 
+                                                 buttons = c('copy', 'csv', 
+                                                             'excel', 'pdf', 
+                                                             'print'))) %>%
+  formatStyle(
+    'color',
+    width='20px',
+    `font-size` ="1px",
+    color = styleEqual(
+      inter$color, inter$color
+    ),
+    backgroundColor = styleEqual(
+      inter$color, inter$color
+    )
+  )
 shiny::setProgress(6/8) 
 ```
 

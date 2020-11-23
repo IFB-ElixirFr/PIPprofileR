@@ -1,13 +1,12 @@
 output$resumeQuery <-  renderDataTable({
   if(!is.null(genomes$genomesNto1)){
     if(genomes$seqType == "DNA"){
-      genomes$SummarySequence  = do.call("rbind", lapply(genomes$genomesNto1$sequences, function(s){
+      resInter  = do.call("rbind", lapply(genomes$genomesNto1$sequences, function(s){
         c(Size = nchar(s), (table(unlist(strsplit(as.character(s),"")))/nchar(s)) * 100)
       }))
 
     } else {
       suppressMessages(suppressWarnings(library(seqinr)))
-
       resInter <- do.call("rbind", lapply(genomes$genomesNto1$sequences, function(s){
 
         statInter = AAstat(unlist(strsplit(as.character(s), "")), plot = F)
@@ -22,15 +21,59 @@ output$resumeQuery <-  renderDataTable({
       }))
 
       detach(package:seqinr)
-
-      genomes$SummarySequence = resInter
-
+      rownames(resInter) = as.character(names(genomes$genomesNto1$sequences))
     }
-    genomes$SummarySequence
+
+
+    if(!is.null(plotlyRV$colors) ){
+
+      resInter <- as.data.frame(resInter) %>%
+        mutate(name = unlist(lapply(rownames(resInter), function(x){
+          pos = which(unlist(strsplit(x, "")) == "_")
+          pos = pos[length(pos)]
+          substr(x,1,pos-1)
+        })))
+
+
+      inter = cbind.data.frame(allNames = names(plotlyRV$colors), color = plotlyRV$colors)  %>%
+        mutate(name = unlist(lapply(names(plotlyRV$colors), function(x){
+          pos = which(unlist(strsplit(x, "")) == "(")
+          pos = pos[length(pos)]
+          substr(x,1,pos-2)
+        })))
+
+      resInter <- inter  %>%
+        left_join(resInter, by="name") %>%
+        mutate(name = allNames) %>%
+        select(-allNames) %>%
+        arrange(match(name, rev(levels(plotlyRV$p$name))))
+    }
+
+    genomes$SummarySequence = resInter
+
+    DT::datatable(genomes$SummarySequence, rownames = FALSE,  colnames = c('', colnames(genomes$SummarySequence)[-1]),
+                  selection = 'none',escape = F, extensions = 'FixedColumns',
+                  options = list( dom = 't', scrollX = T,
+                                  fixedColumns = list(leftColumns = c(2,3)))
+    ) %>%
+      formatStyle(
+        'color',
+        width='20px',
+        `font-size` ="1px",
+        color = styleEqual(
+          genomes$SummarySequence$color, genomes$SummarySequence$color
+        ),
+        backgroundColor = styleEqual(
+          genomes$SummarySequence$color, genomes$SummarySequence$color
+        )
+      )
+
   } else {
     NULL
   }
-}, selection = 'none', options = list(scrollX = TRUE))
+})
+
+
 
 
 output$refName_ui <- renderUI(
