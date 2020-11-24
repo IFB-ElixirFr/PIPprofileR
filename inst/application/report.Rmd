@@ -32,6 +32,10 @@ h2 {
     font-weight: bold;
 }
 
+tfoot {
+      display: none;
+}
+
 ```
 
 # PIP profiles
