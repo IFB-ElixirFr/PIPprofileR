@@ -267,7 +267,6 @@ output$hover_info <- renderUI({
   # }
 })
 
-
 output$pipExplo <-  renderDT({
   # if(!is.null(plotlyRV$p)){
   #
@@ -318,6 +317,10 @@ output$pipExplo <-  renderDT({
 
 
   if(!is.null(plotlyRV$p) & !is.null(plotlyRV$colors)){
+
+    #---------------------------------------------------------------------------
+    # Create DT
+    #---------------------------------------------------------------------------
     inter = plotlyRV$p %>%
       group_by(name) %>%
       summarize(
@@ -399,6 +402,12 @@ output$pipExplo <-  renderDT({
              min_focus, mean_focus, max_focus, dif_mean_focus,
              min_brush, mean_brush, max_brush, dif_mean)
 
+    RMD$dt <- inter
+
+    #---------------------------------------------------------------------------
+    # sketch
+    #---------------------------------------------------------------------------
+
     if(!is.null(input$plot_hover)){
       hover=input$plot_hover
       textHover = HTML(paste0("Hover <br>(pos. : ", round(hover$x), ")"))
@@ -432,12 +441,29 @@ output$pipExplo <-  renderDT({
                    "Min", "Mean", "Max", "Mean diff",
                    "Min", "Mean", "Max", "Mean diff"), th)
         )
-      )
-    ))
+      ) ,
 
-    RMD$dt <- inter
+      tableFooter(c("", lapply(1:(ncol(inter)-1), function(i, arg2){
+
+        if(i == 1 | all(is.na(as.data.frame(arg2)[, (i+1)])) | all(as.data.frame(arg2)[, (i+1)] == "" )){
+          ""
+        } else {
+          actionButton(
+            paste0("btn_",i),
+            "plot",
+            # class = "btn-primary btn-sm",
+            # style = "border-radius: 50%;",
+            onclick='Shiny.onInputChange("select_button",  this.id)'
+          )
+        }
+
+      }, arg2=inter)))
+    ))
     RMD$sketch <- sketch
 
+    #---------------------------------------------------------------------------
+    # DT
+    #---------------------------------------------------------------------------
     DT::datatable(inter, rownames = FALSE,
                   filter = 'top',
                   container = sketch,
@@ -448,7 +474,8 @@ output$pipExplo <-  renderDT({
                     autoWidth = TRUE,
                     dom = 't',
                     scrollY = "400px",
-                    columnDefs = list(list(searchable = FALSE, targets = 0)),
+                    columnDefs = list(list(searchable = FALSE, targets = 0),
+                                      list(className = 'dt-center', targets = "_all")),
                     paging=FALSE,  processing=FALSE,
                     scrollX = "600px",
                     fixedColumns = list(leftColumns= 2)),
@@ -470,6 +497,43 @@ output$pipExplo <-  renderDT({
   }
 })
 
+
+observeEvent(input$select_button, {
+  selectCol <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
+message()
+  showModal(modalDialog(
+    title = "Data visualization",
+    footer = modalButton("Close"),
+    size = "l",
+    easyClose = T,
+    radioButtons("rbModal", label = "Representation type", choices = c("violin","density", "histogram" ), inline = T),
+    plotOutput(outputId = "plotModal")
+  )
+  )
+
+  output$plotModal <- renderPlot({
+
+    if(input$rbModal == "density"){
+      ggplot( mapping=aes(x=as.data.frame(RMD$dt)[, (selectCol+1)]))+
+        geom_density(fill = "seashell", color = "seashell") +
+        stat_density(geom = "line", size = 1) + xlab("Values") +
+        theme_bw() + theme(axis.title = element_text(size = 16))
+    } else if(input$rbModal == "histogram" ){
+      ggplot(mapping=aes(x=as.data.frame(RMD$dt)[, (selectCol+1)])) +
+        geom_histogram(bins = 30)  + xlab("Values") +
+        theme_bw() + theme(axis.title = element_text(size = 16))
+    }  else if(input$rbModal == "violin" ){
+      ggplot(mapping=aes(y=as.data.frame(RMD$dt)[, (selectCol+1)], x = "")) +
+        geom_violin( fill='white', color="#3c8dbc") + ylab("Values") +
+        xlab("") + geom_dotplot(binaxis='y', stackdir='center', dotsize=1, fill="#3c8dbc") +
+        theme_bw() + theme(axis.title = element_text(size = 16))
+    }else {
+      NULL
+    }
+
+  })
+
+})
 
 
 output$hover_info_annot <- renderUI({
