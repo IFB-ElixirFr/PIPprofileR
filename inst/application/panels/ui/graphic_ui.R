@@ -16,7 +16,7 @@ graphic <- fluidPage(
            #
            # )
            helpText("The table below is dynamic. Hover the graph or select an area"),
-           DT::dataTableOutput(outputId = "pipExplo",height = '500px')
+           DTOutput(outputId = "pipExplo",height = '600px')
     ),
     column(4,
            h2(tagList(shiny::icon("pen"), "Annotation")),

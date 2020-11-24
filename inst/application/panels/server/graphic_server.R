@@ -114,11 +114,14 @@ observe({
             axis.title=element_text(size=14,face="bold"),
             legend.title = element_text(size=14,face="bold"),
             legend.text = element_text(size=12)) +
-      scale_x_continuous( name= plotlyRV$title_x , limits=plotlyRV$xlim ,
+      coord_cartesian(xlim = plotlyRV$xlim,
+                      ylim = plotlyRV$ylim) +
+      scale_x_continuous( name= plotlyRV$title_x ,
+                          # limits=plotlyRV$xlim ,
                           breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMajorX),
                           minor_breaks = seq(0, length(plotlyRV$refPositions), plotlyRV$spaceMinorX))  +
       scale_y_continuous( name=plotlyRV$title_y,
-                          limits=plotlyRV$ylim ,
+                          # limits=plotlyRV$ylim ,
                           breaks = seq(0, 100, plotlyRV$spaceMajorY),
                           minor_breaks = seq(0, 100, plotlyRV$spaceMinorY)) +
       labs(color=plotlyRV$title_legende) +
@@ -191,11 +194,11 @@ output$plotGGPLOT <- renderPlot({
       plotlyRV$annotationTable = annotationTable
 
       RMD$plot <- plotlyRV$plotGG + geom_rect(inherit.aes = FALSE, data = data.frame(xmin = -Inf,
-                                                                                             xmax = Inf,
-                                                                                             ymin = 101,
-                                                                                             ymax = Inf),
-                                                      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                                                      fill = "white") +
+                                                                                     xmax = Inf,
+                                                                                     ymin = 101,
+                                                                                     ymax = Inf),
+                                              aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                                              fill = "white") +
         geom_segment(data=annotationTable, mapping=aes(x=start, y=(as.numeric(y)*(3) + 105),
                                                        xend=end,
                                                        yend=(as.numeric(y)*(3) + 105),
@@ -265,9 +268,7 @@ output$hover_info <- renderUI({
 })
 
 
-
-
-output$pipExplo <-  DT::renderDataTable({
+output$pipExplo <-  renderDT({
   # if(!is.null(plotlyRV$p)){
   #
   #   inter <- plotlyRV$p %>%
@@ -325,7 +326,8 @@ output$pipExplo <-  DT::renderDataTable({
         "Median" = median(as.numeric(y), na.rm = TRUE),
         "Mean" = mean(as.numeric(y), na.rm = TRUE),
         "3rd Qu." = quantile(as.numeric(y), na.rm = TRUE)[4],
-        "Max"  = max(as.numeric(y), na.rm = TRUE)) %>%
+        "Max"  = max(as.numeric(y), na.rm = TRUE),
+        options(dplyr.summarise.inform=F) ) %>%
       arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
       mutate(Color = plotlyRV$colors[rev(levels(plotlyRV$p$name))])
 
@@ -350,7 +352,8 @@ output$pipExplo <-  DT::renderDataTable({
           group_by(name) %>%
           summarize(mean_focus = mean(as.numeric(y), na.rm = TRUE),
                     max_focus = max(as.numeric(y), na.rm = TRUE),
-                    min_focus = min(as.numeric(y), na.rm = TRUE)  )%>%
+                    min_focus = min(as.numeric(y), na.rm = TRUE),
+                    options(dplyr.summarise.inform=F) )%>%
           arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
           select(name, min_focus, mean_focus, max_focus ),
         by = "name") %>%
@@ -372,7 +375,8 @@ output$pipExplo <-  DT::renderDataTable({
               group_by(name) %>%
               summarize(mean_brush = mean(as.numeric(y), na.rm = TRUE),
                         max_brush = max(as.numeric(y), na.rm = TRUE),
-                        min_brush = min(as.numeric(y), na.rm = TRUE)  )%>%
+                        min_brush = min(as.numeric(y), na.rm = TRUE),
+                        options(dplyr.summarise.inform=F) )%>%
               arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
               select(name, min_brush, mean_brush, max_brush ),
             by = "name") %>%
@@ -434,11 +438,20 @@ output$pipExplo <-  DT::renderDataTable({
     RMD$dt <- inter
     RMD$sketch <- sketch
 
-    dt = DT::datatable(inter, rownames = FALSE,  container = sketch,  colnames = c('', colnames(inter)[-1]),
-                       selection = 'none',escape = F, options = list( scrollY = "500px",
-                                                                      paging=FALSE,  processing=FALSE,
-                                                                      scrollX = "600px",
-                                                                      fixedColumns = list(leftColumns = c(1,2))),
+    DT::datatable(inter, rownames = FALSE,
+                  filter = 'top',
+                  container = sketch,
+                  colnames = c('', colnames(inter)[-1]),
+                  selection = 'none',escape = F,
+                  extensions = 'FixedColumns',
+                  options = list(
+                    autoWidth = TRUE,
+                    dom = 't',
+                    scrollY = "400px",
+                    columnDefs = list(list(searchable = FALSE, targets = 0)),
+                    paging=FALSE,  processing=FALSE,
+                    scrollX = "600px",
+                    fixedColumns = list(leftColumns= 2)),
     ) %>%
       formatStyle(
         'Color',
@@ -451,7 +464,7 @@ output$pipExplo <-  DT::renderDataTable({
           inter$Color, inter$Color
         )
       ) %>% formatRound(3:ncol(inter), 2)
-    dt
+
   } else {
     NULL
   }
@@ -839,7 +852,8 @@ output$pipStat <-  renderDataTable({
         "Median" = round(median(as.numeric(y), na.rm = TRUE),2),
         "Mean" = round(mean(as.numeric(y), na.rm = TRUE),2),
         "3rd Quantile" = round(quantile(as.numeric(y), na.rm = TRUE)[4],2),
-        "Max"  = round(max(as.numeric(y), na.rm = TRUE),2)) %>%
+        "Max"  = round(max(as.numeric(y), na.rm = TRUE),2),
+        options(dplyr.summarise.inform=F) ) %>%
       arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
       mutate(Color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
       rename("Strains/Species" = name) %>%
