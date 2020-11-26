@@ -16,7 +16,10 @@ graphic <- fluidPage(
            #
            # )
            helpText("The table below is dynamic. Hover the graph or select an area"),
-           DTOutput(outputId = "pipExplo",height = '600px')
+           DTOutput(outputId = "pipExplo",height = '600px'),
+           tags$br(),
+           helpText("Show the strains / species displayed in the table below"),
+           actionButton("selectCB", "Update")
     ),
     column(4,
            h2(tagList(shiny::icon("pen"), "Annotation")),

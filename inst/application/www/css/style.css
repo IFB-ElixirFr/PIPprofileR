@@ -30,10 +30,10 @@ h2 {
 
 }
 
-
 input:disabled {
   background: white !important;
   border: white 0px solid !important;
   width: 0px !important;
   display: none !important;
 }
+

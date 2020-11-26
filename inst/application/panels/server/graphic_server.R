@@ -99,7 +99,8 @@ output$resumeGene_attributes <- renderUI({
 
 observe({
   if(!is.null(plotlyRV$p)){
-    plotlyRV$plotGG <- ggplot(plotlyRV$p, aes(x = x, y = y, colour = name)) +
+    plotlyRV$plotGG <- ggplot(subset(plotlyRV$p, name %in% plotlyRV$selectedRow),
+                              aes(x = x, y = y, colour = name)) +
       geom_line() +
       ggtitle(plotlyRV$title_main) +
       scale_color_manual(values= plotlyRV$colors) +
@@ -218,54 +219,9 @@ output$plotGGPLOT <- renderPlot({
 # Explore
 ################################################################################
 
-output$hover_info <- renderUI({
-  #   emptyTemp = HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
-  #                          paste(plotlyRV$p %>%
-  #                                  select(name) %>%
-  #                                  distinct(name) %>%
-  #                                  arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-  #                                  mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
-  #                                         printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td></td><tr>")
-  #                                  ) %>%
-  #                                  pull (printText), collapse = ""),
-  #                          "</tbody></table>", collapse=""))
-  #
-  #
-  #
-  #   if(!is.null(input$plot_hover)){
-  #     hover=input$plot_hover
-  #
-  #     if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
-  #
-  #       HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
-  #                  paste(plotlyRV$p %>%
-  #                          select(name) %>%
-  #                          distinct(name) %>%
-  #                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-  #                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
-  #                          left_join(plotlyRV$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
-  #                          mutate(printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
-  #                          ) %>%
-  #                          pull (printText), collapse = ""),
-  #                  "</tbody></table>", collapse=""))
-  #
-  #     } else {
-  #       emptyTemp
-  #     }
-  #
-  #   } else {
-  #
-  #     emptyTemp
-  #   }
-
-  # or
-  # if(!is.null(input$plot_hover)){
-  #   hover=input$plot_hover
-  #   p(paste0("Hover position : ", round(hover$x)))
-  # } else {
-  #   p("Hover position : ")
-  # }
-})
+#===============================================================================
+# Datatbale
+#===============================================================================
 
 output$pipExplo <-  renderDT({
   # if(!is.null(plotlyRV$p)){
@@ -314,7 +270,6 @@ output$pipExplo <-  renderDT({
   # } else {
   #   NULL
   # }
-
 
   if(!is.null(plotlyRV$p) & !is.null(plotlyRV$colors)){
 
@@ -394,15 +349,18 @@ output$pipExplo <-  renderDT({
     }
 
 
-    inter = inter %>%
+    inter = inter  %>%
       rename("Strains/Species" = name,
              "Hover" = y) %>%
-      select("Color","Strains/Species", "Color", "Min", "1st Qu.", "Median",
+      select("Color","Strains/Species",  "Min", "1st Qu.", "Median",
              "Mean", "3rd Qu.", "Max",  "Hover",
              min_focus, mean_focus, max_focus, dif_mean_focus,
              min_brush, mean_brush, max_brush, dif_mean)
 
     RMD$dt <- inter
+    if(is.null(plotlyRV$selectedRow)){
+      plotlyRV$selectedRow = as.data.frame(RMD$dt)[,2]
+    }
 
     #---------------------------------------------------------------------------
     # sketch
@@ -445,14 +403,13 @@ output$pipExplo <-  renderDT({
 
       tableFooter(c("", lapply(1:(ncol(inter)-1), function(i, arg2){
 
+
         if(i == 1 | all(is.na(as.data.frame(arg2)[, (i+1)])) | all(as.data.frame(arg2)[, (i+1)] == "" )){
           ""
         } else {
           actionButton(
             paste0("btn_",i),
             "plot",
-            # class = "btn-primary btn-sm",
-            # style = "border-radius: 50%;",
             onclick='Shiny.onInputChange("select_button",  this.id)'
           )
         }
@@ -464,18 +421,22 @@ output$pipExplo <-  renderDT({
     #---------------------------------------------------------------------------
     # DT
     #---------------------------------------------------------------------------
-    DT::datatable(inter, rownames = FALSE,
+
+    DT::datatable(inter,
+                  rownames = FALSE,
                   filter = 'top',
                   container = sketch,
                   colnames = c('', colnames(inter)[-1]),
-                  selection = 'none',escape = F,
+                  escape = F,
                   extensions = 'FixedColumns',
+                  selection = "none",
                   options = list(
                     autoWidth = TRUE,
                     dom = 't',
                     scrollY = "400px",
                     columnDefs = list(list(searchable = FALSE, targets = 0),
-                                      list(className = 'dt-center', targets = "_all")),
+                                      list(className = 'dt-center', targets = "_all")
+                                      ),
                     paging=FALSE,  processing=FALSE,
                     scrollX = "600px",
                     fixedColumns = list(leftColumns= 2)),
@@ -498,9 +459,16 @@ output$pipExplo <-  renderDT({
 })
 
 
+observeEvent(input$selectCB, {
+  plotlyRV$selectedRow = as.data.frame(RMD$dt)[input$pipExplo_rows_all,2]
+})
+
+#===============================================================================
+# Plot by column
+#===============================================================================
+
 observeEvent(input$select_button, {
   selectCol <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
-message()
   showModal(modalDialog(
     title = "Data visualization",
     footer = modalButton("Close"),
@@ -536,55 +504,108 @@ message()
 })
 
 
-output$hover_info_annot <- renderUI({
-  if(!is.null(input$plot_hover) & !is.null(plotlyRV$annotationTable)){
-    hover=input$plot_hover
-    HTML(paste(plotlyRV$annotationTable %>%
-                 filter(as.numeric(plotlyRV$annotationTable$start) <= round(hover$x) & as.numeric(plotlyRV$annotationTable$end) >= round(hover$x)) %>%
-                 pull(attributes), collapse = "<br>"))
-  }
-})
+#===============================================================================
+# Awaiting validation
+#===============================================================================
+
+# output$hover_info <- renderUI({
+#   emptyTemp = HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
+#                          paste(plotlyRV$p %>%
+#                                  select(name) %>%
+#                                  distinct(name) %>%
+#                                  arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+#                                  mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
+#                                         printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td></td><tr>")
+#                                  ) %>%
+#                                  pull (printText), collapse = ""),
+#                          "</tbody></table>", collapse=""))
+#
+#
+#
+#   if(!is.null(input$plot_hover)){
+#     hover=input$plot_hover
+#
+#     if(round(hover$x) >= min(as.numeric(plotlyRV$p$x)) & round(hover$x) <= max(as.numeric(plotlyRV$p$x))){
+#
+#       HTML(paste("<table style='width: 100%;'><thead><tr><th>Species</th><th>PIP</th></tr></thead><tbody>",
+#                  paste(plotlyRV$p %>%
+#                          select(name) %>%
+#                          distinct(name) %>%
+#                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+#                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))]) %>%
+#                          left_join(plotlyRV$p %>% filter(as.numeric(x) == round(hover$x)), by = "name") %>%
+#                          mutate(printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(as.numeric(y), 1),"</td><tr>")
+#                          ) %>%
+#                          pull (printText), collapse = ""),
+#                  "</tbody></table>", collapse=""))
+#
+#     } else {
+#       emptyTemp
+#     }
+#
+#   } else {
+#
+#     emptyTemp
+#   }
+
+# or
+# if(!is.null(input$plot_hover)){
+#   hover=input$plot_hover
+#   p(paste0("Hover position : ", round(hover$x)))
+# } else {
+#   p("Hover position : ")
+# }
+# })
+
+# output$hover_info_annot <- renderUI({
+#   if(!is.null(input$plot_hover) & !is.null(plotlyRV$annotationTable)){
+#     hover=input$plot_hover
+#     HTML(paste(plotlyRV$annotationTable %>%
+#                  filter(as.numeric(plotlyRV$annotationTable$start) <= round(hover$x) & as.numeric(plotlyRV$annotationTable$end) >= round(hover$x)) %>%
+#                  pull(attributes), collapse = "<br>"))
+#   }
+# })
 
 
-output$brush_info <- renderUI({
-  #   if(!is.null(input$plot_brush)){
-  #     brush=input$plot_brush
-  #
-  #     if(nrow(plotlyRV$p %>%
-  #             filter(plotlyRV$p$x >= brush$xmin,
-  #                    plotlyRV$p$x <= brush$xmax) %>%
-  #             group_by(name) ) != 0){
-  #       HTML(paste("<b>Start </b>: " , round(brush$xmin), " - <b>End </b>: ", round(brush$xmax)," - Length </b>: ",   round(brush$xmax - brush$xmin),
-  #                  "<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>",
-  #                  paste(plotlyRV$p %>%
-  #                          filter(plotlyRV$p$x >= brush$xmin,
-  #                                 plotlyRV$p$x <= brush$xmax) %>%
-  #                          group_by(name) %>%
-  #                          summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
-  #                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
-  #                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
-  #                                 printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(mean_size, 1),"</td><tr>")
-  #                          ) %>%
-  #                          pull (printText), collapse = ""),
-  #                  "</tbody></table>", collapse=""))
-  #     } else {
-  #       NULL
-  #     }
-  #
-  #   } else {
-  #     NULL
-  #   }
+# output$brush_info <- renderUI({
+#   if(!is.null(input$plot_brush)){
+#     brush=input$plot_brush
+#
+#     if(nrow(plotlyRV$p %>%
+#             filter(plotlyRV$p$x >= brush$xmin,
+#                    plotlyRV$p$x <= brush$xmax) %>%
+#             group_by(name) ) != 0){
+#       HTML(paste("<b>Start </b>: " , round(brush$xmin), " - <b>End </b>: ", round(brush$xmax)," - Length </b>: ",   round(brush$xmax - brush$xmin),
+#                  "<table style='width: 100%;'><thead><tr><th>Species</th><th style='text-align:center'>Mean PIP</th></tr></thead><tbody>",
+#                  paste(plotlyRV$p %>%
+#                          filter(plotlyRV$p$x >= brush$xmin,
+#                                 plotlyRV$p$x <= brush$xmax) %>%
+#                          group_by(name) %>%
+#                          summarize(mean_size = mean(as.numeric(y), na.rm = TRUE)) %>%
+#                          arrange(match(name, rev(levels(plotlyRV$p$name)))) %>%
+#                          mutate(color = plotlyRV$colors[rev(levels(plotlyRV$p$name))],
+#                                 printText = paste0("<tr><td><div style='float: left; margin: 3px 5px; width: 20px; height:12px;background-color:",color,"'></div>",name,"</td><td style='text-align:center'>",round(mean_size, 1),"</td><tr>")
+#                          ) %>%
+#                          pull (printText), collapse = ""),
+#                  "</tbody></table>", collapse=""))
+#     } else {
+#       NULL
+#     }
+#
+#   } else {
+#     NULL
+#   }
 
 
-  # Or
-  # if(!is.null(input$plot_brush)){
-  #   brush=input$plot_brush
-  #   p(paste0("Start area position : ",round(brush$xmin)," - End area position : ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin)))
-  # } else {
-  #   tagList()
-  #   p("Start area position :  - End area position :  - Length : ")
-  # }
-})
+# Or
+# if(!is.null(input$plot_brush)){
+#   brush=input$plot_brush
+#   p(paste0("Start area position : ",round(brush$xmin)," - End area position : ",round(brush$xmax)," - Length : ", round(brush$xmax - brush$xmin)))
+# } else {
+#   tagList()
+#   p("Start area position :  - End area position :  - Length : ")
+# }
+# })
 
 ################################################################################
 # Update
