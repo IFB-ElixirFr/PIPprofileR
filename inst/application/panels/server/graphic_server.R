@@ -503,6 +503,19 @@ observeEvent(input$select_button, {
 
 })
 
+#===============================================================================
+# Hover annotation information
+#===============================================================================
+
+output$hover_info_annot <- renderUI({
+  if(!is.null(input$plot_hover) & !is.null(plotlyRV$annotationTable)){
+    hover=input$plot_hover
+    HTML(paste(plotlyRV$annotationTable %>%
+                 filter(as.numeric(plotlyRV$annotationTable$start) <= round(hover$x) & as.numeric(plotlyRV$annotationTable$end) >= round(hover$x)) %>%
+                 pull(attributes), collapse = "<br><br>"))
+  }
+})
+
 
 #===============================================================================
 # Awaiting validation
@@ -557,14 +570,7 @@ observeEvent(input$select_button, {
 # }
 # })
 
-# output$hover_info_annot <- renderUI({
-#   if(!is.null(input$plot_hover) & !is.null(plotlyRV$annotationTable)){
-#     hover=input$plot_hover
-#     HTML(paste(plotlyRV$annotationTable %>%
-#                  filter(as.numeric(plotlyRV$annotationTable$start) <= round(hover$x) & as.numeric(plotlyRV$annotationTable$end) >= round(hover$x)) %>%
-#                  pull(attributes), collapse = "<br>"))
-#   }
-# })
+
 
 
 # output$brush_info <- renderUI({
