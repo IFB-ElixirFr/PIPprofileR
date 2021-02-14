@@ -49,7 +49,7 @@ In this folder, you will find a file named INSTALLATION_WINDOWS.bat. By double c
 ``` bash
 git clone https://github.com/IFB-ElixirFr/PIPprofileR.git
 cd PIPprofileR
-sudo ./INSTALLATION_MAC.sh
+sudo installation/INSTALLATION_MAC.sh
 ```
 
 The installation will begin. This may take a little time depending on the quality of your internet connection. When the installation is completed, a new file will appear. They allow to launch the PIPprofileR applications. Once the installation is complete, use this command to launch PIPprofileR:
@@ -75,7 +75,7 @@ Check "Always Open With" and after clicking OK you should be able to execute you
 ```
 git clone https://github.com/IFB-ElixirFr/PIPprofileR.git
 cd PIPprofileR
-sudo ./INSTALLATION_LINUX.sh
+sudo installation/INSTALLATION_LINUX.sh 
 ```
 Once the installation is complete, use this command to launch PIPprofileR:
 ```
