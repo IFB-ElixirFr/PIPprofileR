@@ -143,7 +143,7 @@ graphic <- fluidPage(
                   actionButton("updateTitle", label = "Update", icon = icon("sync-alt"))
          ),
          tabPanel("Colors",
-                  selectizeInput("speciesColor_name", "Select species",
+                  selectizeInput("speciesColor_name", "Select sequence",
                                  width = "100%", choices = NULL,
                                  selected = NULL, multiple = FALSE),
                   colourInput("speciesColor_picker", "Select color"),

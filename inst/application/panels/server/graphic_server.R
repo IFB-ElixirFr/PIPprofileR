@@ -718,9 +718,9 @@ observeEvent(genomes$genomesNto1$alignments, {
       updateTextInput(session, "titleInput_legende", value = plotlyRV$title_legende)
 
       updateSelectizeInput(session, "speciesColor_name",
-                           choices =  setNames(names(plotlyRV$colors),
-                                               names(plotlyRV$colors)),
-                           selected = names(plotlyRV$colors)[1])
+                           choices =  setNames(rev(names(plotlyRV$colors)),
+                                               rev(names(plotlyRV$colors))),
+                           selected = rev(names(plotlyRV$colors))[1])
 
       updateColourInput(session, "speciesColor_picker",
                         value = as.character(plotlyRV$colors[names(plotlyRV$colors)[1]]))
@@ -924,9 +924,9 @@ createPIPprofile <- function(keepColor){
   updateNumericInput(session, "spaceMinorY", value = plotlyRV$spaceMinorY)
 
   updateSelectizeInput(session, "speciesColor_name",
-                       choices =  setNames(names(plotlyRV$colors),
-                                           names(plotlyRV$colors)),
-                       selected = names(plotlyRV$colors)[1])
+                       choices =  setNames(rev(names(plotlyRV$colors)),
+                                           rev(names(plotlyRV$colors))),
+                       selected = rev(names(plotlyRV$colors))[1])
 }
 
 ################################################################################
