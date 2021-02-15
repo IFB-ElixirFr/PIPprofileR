@@ -460,7 +460,15 @@ output$pipExplo <-  renderDT({
 
 
 observeEvent(input$selectCB, {
+
   plotlyRV$selectedRow = as.data.frame(RMD$dt)[input$pipExplo_rows_all,2]
+
+  updateMultiInput(
+    session = session,
+    inputId = "multiInput_display",
+    choices = rev(names(plotlyRV$colors)),
+    selected = plotlyRV$selectedRow
+  )
 })
 
 #===============================================================================
@@ -645,14 +653,12 @@ output$multiInput_display <- renderUI({
       inputId = "multiInput_display",
       label = NULL,
       choices = rev(names(plotlyRV$colors)),
-      selected = rev(names(plotlyRV$colors)),
+      selected = plotlyRV$selectedRow,
       width = "100%"
     )
   }
 
 })
-
-
 
 observeEvent(input$clear_display, {
   updateMultiInput(
@@ -716,6 +722,30 @@ observeEvent(input$updateGenes, {
 
 observeEvent(input$updateColor, {
   plotlyRV$colors[input$speciesColor_name] = input$speciesColor_picker
+})
+
+observeEvent(input$updateColor_file_update, {
+
+  if(!is.null(input$file_color$datapath)){
+
+    inter = read.csv2(input$file_color$datapath, sep = "\t",
+                     stringsAsFactors = F)
+
+    interName = unlist(lapply(names(plotlyRV$colors), function(x){
+      last = rev(which(strsplit(x, '')[[1]] == "("))[1]
+      return(substr(x,1,last-2))
+    }))
+
+    for( i in 1:nrow(inter) ){
+      pos = which(interName == inter[i, 1] )
+      if (length(pos) == 1) {
+        plotlyRV$colors[pos] =  inter[i, 2]
+      }
+    }
+    updateColourInput(session, "speciesColor_picker",
+                      value = as.character(plotlyRV$colors[input$speciesColor_name]))
+
+  }
 })
 
 observeEvent(input$updateGrid, {

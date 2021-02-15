@@ -143,11 +143,21 @@ graphic <- fluidPage(
                   actionButton("updateTitle", label = "Update", icon = icon("sync-alt"))
          ),
          tabPanel("Colors",
+                  fluidRow(column(6,
                   selectizeInput("speciesColor_name", "Select sequence",
                                  width = "100%", choices = NULL,
                                  selected = NULL, multiple = FALSE),
                   colourInput("speciesColor_picker", "Select color"),
-                  actionButton("updateColor", label = "Update", icon = icon("sync-alt"))
+                  actionButton("updateColor", label = "Update", icon = icon("sync-alt"))),
+                  column(6,
+                         h4("Import color file"),
+                         helpText("Available in the zip folder when you save an exploration."),
+                         fileInput("file_color",label = NULL,
+                                   buttonLabel = "Browse...",
+                                   placeholder = "No file selected"),
+                         ),
+                        actionButton("updateColor_file_update", label = "Update with file", icon = icon("sync-alt"))
+                  )
          ),
          tabPanel("Sequences",
                   h3("Displayed sequences"),

@@ -198,6 +198,17 @@ shinyServer(function(input, output, session) {
                 incProgress(1/step ,  detail  = "Save Rdata")
                 save(Nto1_list, file = file.path(tmpFolder,'genomesNto1.Rdata'))
 
+                interName = unlist(lapply(names(plotlyRV$colors), function(x){
+                    last = rev(which(strsplit(x, '')[[1]] == "("))[1]
+                    return(substr(x,1,last-2))
+                }))
+
+                write.table(cbind(Sequence = interName,
+                                  Color = as.character(plotlyRV$colors)),
+                            file =  file.path(tmpFolder,'color_species.tsv'),
+                                      quote = F, row.names = F,
+                                      sep ="\t")
+
                 incProgress(1/step ,  detail  = "Copy annotation (if available)")
                 if(!is.null(rvAnnotation$annotation)) {
                     if(!is.null(input$fileAnnot)){
