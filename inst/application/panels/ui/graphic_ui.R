@@ -149,6 +149,15 @@ graphic <- fluidPage(
                   colourInput("speciesColor_picker", "Select color"),
                   actionButton("updateColor", label = "Update", icon = icon("sync-alt"))
          ),
+         tabPanel("Sequences",
+                  h3("Displayed sequences"),
+                  helpText("Select the sequences to be displayed in plot."),
+                  uiOutput("multiInput_display"),
+                  actionButton("clear_display", "Clear"),
+                  actionButton("all_display", "All"),
+                  actionButton("update_display", "Update")
+         ),
+
          tabPanel("Grid",
                   fluidRow(
                     column(4, h4("Grid color"),

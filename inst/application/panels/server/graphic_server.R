@@ -635,6 +635,48 @@ observeEvent(rvAnnotation$annotation, {
 
 
 ################################################################################
+# Update display
+################################################################################
+
+output$multiInput_display <- renderUI({
+
+  if(! is.null(rev(names(plotlyRV$colors))) ){
+    multiInput(
+      inputId = "multiInput_display",
+      label = NULL,
+      choices = rev(names(plotlyRV$colors)),
+      selected = rev(names(plotlyRV$colors)),
+      width = "100%"
+    )
+  }
+
+})
+
+
+
+observeEvent(input$clear_display, {
+  updateMultiInput(
+    session = session,
+    inputId = "multiInput_display",
+    choices = rev(names(plotlyRV$colors)),
+    selected = NULL
+  )
+})
+
+observeEvent(input$all_display, {
+  updateMultiInput(
+    session = session,
+    inputId = "multiInput_display",
+    choices = rev(names(plotlyRV$colors)),
+    selected = rev(names(plotlyRV$colors))
+  )
+})
+
+observeEvent(input$update_display, {
+  plotlyRV$selectedRow = input$multiInput_display
+})
+
+################################################################################
 # Update - Buttons
 ################################################################################
 
@@ -721,6 +763,14 @@ observeEvent(genomes$genomesNto1$alignments, {
                            choices =  setNames(rev(names(plotlyRV$colors)),
                                                rev(names(plotlyRV$colors))),
                            selected = rev(names(plotlyRV$colors))[1])
+
+
+      updateMultiInput(
+        session = session,
+        inputId = "multiInput_display",
+        choices = rev(names(plotlyRV$colors)),
+        selected = rev(names(plotlyRV$colors))
+      )
 
       updateColourInput(session, "speciesColor_picker",
                         value = as.character(plotlyRV$colors[names(plotlyRV$colors)[1]]))
@@ -927,6 +977,13 @@ createPIPprofile <- function(keepColor){
                        choices =  setNames(rev(names(plotlyRV$colors)),
                                            rev(names(plotlyRV$colors))),
                        selected = rev(names(plotlyRV$colors))[1])
+
+  updateMultiInput(
+    session = session,
+    inputId = "multiInput_display",
+    choices = rev(names(plotlyRV$colors)),
+    selected = rev(names(plotlyRV$colors))
+  )
 }
 
 ################################################################################
