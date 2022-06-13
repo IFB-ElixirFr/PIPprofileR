@@ -176,6 +176,11 @@ shinyServer(function(input, output, session) {
                     params$annotationTable = NA
                 }
 
+                report_path <- tempfile(fileext = ".Rmd")
+                tmp_path <- dirname(report_path)
+                file.copy("rmarkdown", tmp_path, recursive = TRUE, overwrite = TRUE)
+                file.copy("report.Rmd", report_path, overwrite = TRUE)
+                
                 rmarkdown::render("report.Rmd", output_file = fname,
                                   params = params,
                                   envir = new.env(parent = globalenv())
